@@ -2,6 +2,7 @@ import * as React from 'react'
 import { styled } from '@mui/material/styles'
 import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Unstable_Grid2'
+import Box from '@mui/material/Box'
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -20,10 +21,23 @@ function AppHome() {
     <div >
       <Grid container spacing={2}>
         <Grid xs={3}>
-          <Item>video</Item>
+          <Item>
+            < video
+                src = "dancing_girl.mp4" autoplay = "true" loop
+                width= "100%"
+                height= ""
+                preload= "auto"
+                muted= "muted"
+            />
+          </Item>
         </Grid>
         <Grid xs={9}>
-          <Item>skeleton</Item>
+          <Item>
+          < Box
+                width={window.innerWidth*3/4}
+                height={window.innerHeight - 120 }
+          />
+          </Item>
         </Grid>
       </Grid>
     </div>

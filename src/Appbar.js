@@ -30,18 +30,6 @@ export default function MenuAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={auth}
-              onChange={handleChange}
-              aria-label="login switch"
-            />
-          }
-          label={auth ? 'Logout' : 'Login'}
-        />
-      </FormGroup>
       <AppBar position="static">
         <Toolbar>
           <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} >
@@ -78,13 +66,27 @@ export default function MenuAppBar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Open Video</MenuItem>
-                <MenuItem onClick={handleClose}>Close</MenuItem>
+                <MenuItem onClick={handleClose}>Select Video</MenuItem>
+                <MenuItem onClick={handleClose}>Select Model</MenuItem>
               </Menu>
             </div>
           )}
         </Toolbar>
       </AppBar>
+      {false &&
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={auth}
+              onChange={handleChange}
+              aria-label="Detection"
+            />
+          }
+          label={auth ? 'Show Video' : 'Hide Video'}
+        />
+      </FormGroup>
+       }
     </Box>
   );
 }
