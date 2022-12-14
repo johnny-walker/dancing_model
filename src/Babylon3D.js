@@ -10,8 +10,8 @@ function Babylon3D(props) {
     let height = props.height
     
     var handleResize = function(){
-        width = window.innerWidth*3/4 - 12*5
-        height= window.innerHeight - 64 - 12*3
+        //width = window.innerWidth*3/4 - 12*5
+        //height= window.innerHeight - 64 - 12*3
         if (engine) {
             engine.resize()
         }
