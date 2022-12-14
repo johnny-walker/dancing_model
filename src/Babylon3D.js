@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import * as BABYLON from '@babylonjs/core'
 
-
 let engine = null
 let scene = null
 let timer = null
@@ -11,6 +10,8 @@ function Babylon3D(props) {
     let height = props.height
     
     var handleResize = function(){
+        width = window.innerWidth*3/4 - 12*5
+        height= window.innerHeight - 64 - 12*3
         if (engine) {
             engine.resize()
         }

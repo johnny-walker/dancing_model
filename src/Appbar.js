@@ -67,7 +67,7 @@ export default function MenuAppBar() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleClose}>Select Video</MenuItem>
-                <MenuItem onClick={handleClose}>Select Model</MenuItem>
+                <MenuItem onClick={handleClose}>Select WebCam</MenuItem>
               </Menu>
             </div>
           )}
