@@ -30,8 +30,8 @@ export default function MenuAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar>
+      <AppBar position="static" sx={{ height: '56px' }}>
+        <Toolbar >
           <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} >
             <MenuIcon />
           </IconButton>

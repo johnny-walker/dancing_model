@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 import ButtonAppBar from "./Appbar"
 import AppHome from "./Apphome"
 
@@ -8,7 +8,7 @@ function App() {
       <ButtonAppBar />
       <AppHome />
     </div>
-  );
+  )
 }
 
 export default App;
