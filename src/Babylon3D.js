@@ -37,6 +37,9 @@ function Babylon3D(props) {
                 scene.createDefaultCameraOrLight(true, true, true)
                 scene.createDefaultEnvironment()
                 scene.beginAnimation(skeletons[0], 0, 300, true)
+                var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene)
+                light.intensity = 1.0
+                light.specular = BABYLON.Color3.Black()
 
                 //render loop
                 engine.runRenderLoop(function(){
