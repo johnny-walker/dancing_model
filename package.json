@@ -12,6 +12,8 @@
     "@fontsource/roboto": "^4.5.8",
     "@mui/icons-material": "^5.10.16",
     "@mui/material": "^5.10.17",
+    "@tensorflow-models/pose-detection": "^2.0.0",
+    "@tensorflow/tfjs-core": "^3.21.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
