@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import * as BABYLON from '@babylonjs/core'
+import * as BABYLON from 'babylonjs'
+import 'babylonjs-inspector'
 
 let engine = null
 let scene = null
@@ -35,11 +36,43 @@ function Babylon3D(props) {
         BABYLON.SceneLoader.ImportMesh("", path, model, scene,
             function (meshes, particleSystems, skeletons) {          
                 scene.createDefaultCameraOrLight(true, true, true)
-                scene.createDefaultEnvironment()
-                scene.beginAnimation(skeletons[0], 0, 300, true)
+                var helper = scene.createDefaultEnvironment()
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene)
                 light.intensity = 1.0
-                light.specular = BABYLON.Color3.Black()
+                helper.setMainColor(BABYLON.Color3.Gray())
+                var skeleton = skeletons[0]
+        		var bones = skeleton.bones
+                //console.log(bones.length)
+               
+                var mesh = meshes[0]
+	        	mesh.rotation.y = Math.PI 
+
+                //DEBUG STUFF!
+                let options = {
+                    pauseAnimations : false, 
+                    returnToRest : false, 
+                    computeBonesUsingShaders : true, 
+                    useAllBones : false,
+                    displayMode :  BABYLON.Debug.SkeletonViewer.DISPLAY_SPHERE_AND_SPURS,
+                    displayOptions : {
+                        sphereBaseSize : 1,
+                        sphereScaleUnit : 10, 
+                        sphereFactor : 0.9, 
+                        midStep : 0.25,
+                        midStepFactor : 0.05
+                    }
+                }
+
+                let skeletonView = new BABYLON.Debug.SkeletonViewer(
+                    skeleton, 
+                    mesh,
+                    scene,
+                    false, //autoUpdateBoneMatrices?
+                    (mesh.renderingGroupId > 0 )?mesh.renderingGroupId+1:1,  // renderingGroup
+                    options
+                )
+                //scene.debugLayer.show()
+                //scene.beginAnimation(skeleton, 0, 300, true)    //test code
 
                 //render loop
                 engine.runRenderLoop(function(){
@@ -49,8 +82,6 @@ function Babylon3D(props) {
                 })
             }
         )
-    
-        return scene;
     }
 
     var createScene = function(){
