@@ -31,6 +31,37 @@ function Babylon3D(props) {
         }
     }
 
+    //DEBUG STUFF!
+    var debugScene = function (skeleton, mesh, showLayer=false) {
+        let options = {
+            pauseAnimations : false, 
+            returnToRest : false, 
+            computeBonesUsingShaders : true, 
+            useAllBones : false,
+            displayMode :  BABYLON.Debug.SkeletonViewer.DISPLAY_SPHERE_AND_SPURS,
+            displayOptions : {
+                sphereBaseSize : 1,
+                sphereScaleUnit : 10, 
+                sphereFactor : 0.9, 
+                midStep : 0.25,
+                midStepFactor : 0.05
+            }
+        }
+        
+        let skeletonView = new BABYLON.Debug.SkeletonViewer(
+            skeleton, 
+            mesh,
+            scene,
+            false, //autoUpdateBoneMatrices?
+            (mesh.renderingGroupId > 0 )?mesh.renderingGroupId+1:1,  // renderingGroup
+            options
+        )
+
+        if (showLayer)
+            scene.debugLayer.show()
+        //scene.beginAnimation(skeleton, 0, 300, true)    
+    }
+
     var loadScene = function (path, model) {
     
         BABYLON.SceneLoader.ImportMesh("", path, model, scene,
@@ -46,33 +77,8 @@ function Babylon3D(props) {
                
                 var mesh = meshes[0]
 	        	mesh.rotation.y = Math.PI 
-
-                //DEBUG STUFF!
-                let options = {
-                    pauseAnimations : false, 
-                    returnToRest : false, 
-                    computeBonesUsingShaders : true, 
-                    useAllBones : false,
-                    displayMode :  BABYLON.Debug.SkeletonViewer.DISPLAY_SPHERE_AND_SPURS,
-                    displayOptions : {
-                        sphereBaseSize : 1,
-                        sphereScaleUnit : 10, 
-                        sphereFactor : 0.9, 
-                        midStep : 0.25,
-                        midStepFactor : 0.05
-                    }
-                }
-
-                let skeletonView = new BABYLON.Debug.SkeletonViewer(
-                    skeleton, 
-                    mesh,
-                    scene,
-                    false, //autoUpdateBoneMatrices?
-                    (mesh.renderingGroupId > 0 )?mesh.renderingGroupId+1:1,  // renderingGroup
-                    options
-                )
-                //scene.debugLayer.show()
-                //scene.beginAnimation(skeleton, 0, 300, true)    //test code
+                
+                debugScene(skeleton, mesh)
 
                 //render loop
                 engine.runRenderLoop(function(){
