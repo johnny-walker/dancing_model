@@ -3,12 +3,13 @@ import React, { useEffect } from 'react'
 import * as poseDetection from '@tensorflow-models/pose-detection'
 import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
+import {UpdateKeypoints} from "./Babylon3D.js"
 
 let model = null
 let detector = null
 let poses = null
-//let timer1 = null
 let firstDetect = false
+let timer = null
 
 function BlazePose(props) {
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
@@ -25,14 +26,16 @@ function BlazePose(props) {
         const timestamp = performance.now()
         detector = await poseDetection.createDetector(model, detectorConfig, timestamp)
         console.log('3D POSE detector ready...')
-        //timer1 = window.setInterval(detectPoses, 500)
-        window.requestAnimationFrame(estimatePose)
+        console.log(performance.now() - timestamp)
+        //window.requestAnimationFrame(estimatePose)
+        timer = window.setInterval(estimatePose, 100)
     }
 
    
     var estimatePose = async function() {
         if (!firstDetect) {
             console.log('3D POSE warmup detecting...')
+            clearTimeout(timer)
         }
 
         const video = document.getElementById('dance_video')
@@ -40,16 +43,17 @@ function BlazePose(props) {
 
         const timestamp = performance.now()
         poses = await detector.estimatePoses(video)
-        console.log(performance.now() - timestamp)
 
         if (!firstDetect) {
             console.log('3D POSE frist detecting done...')
             firstDetect = true
+            console.log(performance.now() - timestamp)
+    }
+
+        //console.log(poses[0]?.keypoints3D)
+        if ( poses[0] !== undefined ) {
+            UpdateKeypoints(poses[0].keypoints3D)
         }
-        
-        console.log(poses[0]?.keypoints3D[0])
-        //console.log(poses[0]?.keypoints[0])
-        poses = []
 
         video.play()
         window.requestAnimationFrame(estimatePose)
@@ -65,12 +69,7 @@ function BlazePose(props) {
         
         return () => {
             console.log('BlazePose unmounted')
-            /*
-            if (timer1) {
-                clearTimeout(timer1)
-            }
-            */
-    }
+        }
     }) 
 
     return (
@@ -86,6 +85,5 @@ function BlazePose(props) {
         </div>
     )
 }
-
 
 export default BlazePose
