@@ -5,19 +5,19 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 import {UpdateKeypoints} from "./Babylon3D.js"
 
-let model = null
-let detector = null
-let poses = null
+let invokeDetector = false
 let firstDetect = false
 let timer = null
 
 function BlazePose(props) {
+    let detector = null
+
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
     let width  = props.width  -  props.width  % 32
     let height = props.height -  props.height % 32
 
     var initDetector = async function() {
-        model = poseDetection.SupportedModels.BlazePose
+        const model = poseDetection.SupportedModels.BlazePose
         const detectorConfig =  {
                                     runtime: 'tfjs',        // 'mediapipe' or 'tfjs'
                                     modelType: 'lite',      // 'lite ', 'full', 'heavy'
@@ -27,6 +27,7 @@ function BlazePose(props) {
         detector = await poseDetection.createDetector(model, detectorConfig, timestamp)
         console.log('3D POSE detector ready...')
         console.log(performance.now() - timestamp)
+
         //window.requestAnimationFrame(estimatePose)
         timer = window.setInterval(estimatePose, 100)
     }
@@ -42,13 +43,13 @@ function BlazePose(props) {
         video.pause()
 
         const timestamp = performance.now()
-        poses = await detector.estimatePoses(video)
+        let poses = await detector.estimatePoses(video)
 
         if (!firstDetect) {
             console.log('3D POSE frist detecting done...')
             firstDetect = true
             console.log(performance.now() - timestamp)
-    }
+        }
 
         //console.log(poses[0]?.keypoints3D)
         if ( poses[0] !== undefined ) {
@@ -63,7 +64,8 @@ function BlazePose(props) {
         console.log('BlazePose mounted')
 
         // Load the 3D engine
-        if (!model) {
+        if (!invokeDetector) {
+            invokeDetector = true
             initDetector()
         }
         
