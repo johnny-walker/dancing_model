@@ -24,6 +24,8 @@ function AppHome() {
         <Grid xs={3}>
           <Item>
             < BlazePose
+              width={window.innerWidth/4 - 32}
+              height={window.innerHeight - 64 - 12*3}
             />
           </Item>
         </Grid>
