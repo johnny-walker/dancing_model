@@ -5,8 +5,8 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 import {UpdateKeypoints} from "./Babylon3D.js"
 
-let invokeDetector = false
-let firstDetect = false
+let detectorInvoked = true
+let warmUp = false
 let timer = null
 
 function BlazePose(props) {
@@ -15,7 +15,7 @@ function BlazePose(props) {
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
     let width  = props.width  -  props.width  % 32
     let height = props.height -  props.height % 32
-
+    console.log('res:('+width+','+height+')')
     var initDetector = async function() {
         const model = poseDetection.SupportedModels.BlazePose
         const detectorConfig =  {
@@ -28,26 +28,26 @@ function BlazePose(props) {
         console.log('3D POSE detector ready...')
         console.log(performance.now() - timestamp)
 
-        //window.requestAnimationFrame(estimatePose)
-        timer = window.setInterval(estimatePose, 100)
+        //window.requestAnimationFrame(estimatePose)    // too early
+        timer = window.setInterval(estimatePose, 100)   // delay for 0.1 sec
     }
 
    
     var estimatePose = async function() {
-        if (!firstDetect) {
+        if (!warmUp) {
             console.log('3D POSE warmup detecting...')
             clearTimeout(timer)
         }
 
         const video = document.getElementById('dance_video')
-        video.pause()
+        //video.pause()
 
         const timestamp = performance.now()
         let poses = await detector.estimatePoses(video)
 
-        if (!firstDetect) {
+        if (!warmUp) {
             console.log('3D POSE frist detecting done...')
-            firstDetect = true
+            warmUp = true
             console.log(performance.now() - timestamp)
         }
 
@@ -64,8 +64,8 @@ function BlazePose(props) {
         console.log('BlazePose mounted')
 
         // Load the 3D engine
-        if (!invokeDetector) {
-            invokeDetector = true
+        if (!detectorInvoked) {
+            detectorInvoked = true
             initDetector()
         }
         
@@ -78,7 +78,7 @@ function BlazePose(props) {
         <div>
             <video 
                 id = "dance_video"
-                src = "dancing_girl.mp4" loop
+                src = {props.src} loop
                 width= {width}
                 height= {height}
                 preload= "auto"

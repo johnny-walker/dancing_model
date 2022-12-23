@@ -6,8 +6,11 @@ let g_engine = null
 let g_scene = null
 let g_skeleton = null
 let g_mesh = null
+let g_helper = null
 
 let detectedBones = []
+let g_matrix = null
+let g_scaling = 1.0
 let timer = null
 
 export default function Babylon3D(props) {
@@ -36,7 +39,7 @@ export default function Babylon3D(props) {
     }
 
     //DEBUG STUFF!
-    var debugScene = function (showLayer=true) {
+    var debugScene = function (showAxis=false, showLayer=false) {
         let options = {
             pauseAnimations : false, 
             returnToRest : false, 
@@ -52,7 +55,7 @@ export default function Babylon3D(props) {
             }
         }
         
-        let skeletonView = new BABYLON.Debug.SkeletonViewer(
+        new BABYLON.Debug.SkeletonViewer(
             g_skeleton, 
             g_mesh,
             g_scene,
@@ -60,6 +63,9 @@ export default function Babylon3D(props) {
             (g_mesh.renderingGroupId > 0 )?g_mesh.renderingGroupId+1:1,  // renderingGroup
             options
         )
+        
+        if (showAxis)
+            new BABYLON.AxesViewer(g_scene, 1.0)
 
         if (showLayer)
             g_scene.debugLayer.show()
@@ -71,22 +77,25 @@ export default function Babylon3D(props) {
         BABYLON.SceneLoader.ImportMesh("", path, model, g_scene,
             function (meshes, particleSystems, skeletons) {          
                 g_scene.createDefaultCameraOrLight(true, true, true)
-                var helper = g_scene.createDefaultEnvironment()
                 var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
                 light.intensity = 1.0
-                helper.setMainColor(BABYLON.Color3.Gray())
+                g_helper = g_scene.createDefaultEnvironment()
+                g_helper.setMainColor(BABYLON.Color3.Gray())
                 g_skeleton = skeletons[0]
-                //console.log(g_skeleton.bones.length)
                
+                //console.log(g_skeleton.bones[0].position)
+                //console.log(g_skeleton.bones[60].position)
+
                 g_mesh = meshes[0]
 	        	g_mesh.rotation.y = Math.PI 
                 
-                debugScene(false)
+                debugScene()
 
                 g_scene.beforeRender = function () {
                     if (detectedBones.length > 0) {
-                        for (let i=0; i<detectedBones.length; i++ ) {
-                            let index = dummy3_mapping[i]
+                        //for (let i=0; i<detectedBones.length; i++ ) {
+                        for (let i=23; i<detectedBones.length; i++ ) {
+                                let index = dummy3_mapping[i]
                             if (index === undefined) {
                                 continue
                             }
@@ -126,7 +135,8 @@ export default function Babylon3D(props) {
         if (g_engine === null) {
             initEngine()
         }
- 
+        g_matrix = null
+
         return () => {
             console.log('3D model unmounted')
         }
@@ -181,9 +191,25 @@ export const UpdateKeypoints = (bones) => {
         return
     }
     
+    //console.log(bones[0])
+    //console.log(bones[23])
+    //console.log(bones[24])
+    //console.log(bones[29])
+    //console.log(bones[30])
+
+    if(g_matrix === null) {
+        g_matrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
+        let translate = ( (bones[29].y-bones[23].y) + (bones[30].y-bones[24].y) ) / 2
+        g_scaling = 1.0 / translate
+        let vecDisp = new BABYLON.Vector3(0, translate, 0)
+        g_matrix.setTranslation(vecDisp)
+    }
+
     detectedBones = []
     for (let i=0; i<bones.length; i++ ) {
         let vec = new BABYLON.Vector3(bones[i].x, bones[i].y, bones[i].z)
+
+        vec = BABYLON.Vector3.TransformCoordinates(vec, g_matrix).scale(g_scaling)
         detectedBones.push(vec)
     }
 }

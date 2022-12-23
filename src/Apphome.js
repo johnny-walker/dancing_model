@@ -18,12 +18,14 @@ const Item = styled(Paper)(({ theme }) => ({
 }))
 
 function AppHome() {
+  let videoPath = 'dancing.mp4'
   return (
     <div >
       <Grid container spacing={2}>
         <Grid xs={3}>
           <Item>
             < BlazePose
+              src={videoPath}
               width={window.innerWidth/4 - 32}
               height={window.innerHeight - 64 - 12*3}
             />
