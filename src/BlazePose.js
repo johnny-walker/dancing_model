@@ -5,7 +5,7 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 import {UpdateKeypoints} from "./Babylon3D.js"
 
-let detectorInvoked = false
+let detectorInvoked = true
 let warmUp = false
 let timer = null
 

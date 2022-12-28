@@ -2,21 +2,21 @@ import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
 import {TransformLandmarks, GetPoseCenter} from './utility/dummy3.js'
+import {CreateRotationAgent, GetRotationMatrix} from './utility/rotation.js'
+import {DebugScene, SetSpherePos} from './utility/debugging.js'
 
 let g_engine = null
 let g_scene = null
 let g_skeleton = null
 let g_mesh = null
-let g_arrow = null  
-let g_sphere = null
 let g_helper = null
 let g_center = null
-let timer = null
 
 
 export default function Babylon3D(props) {
     let width = props.width
     let height = props.height
+    let timer = null
     
     var handleResize = function(){
         if (g_engine) {
@@ -39,73 +39,6 @@ export default function Babylon3D(props) {
         }
     }
 
-    //DEBUG STUFF!
-    var debugScene = function (showAxis=true, showLayer=false) {
-        let options = {
-            pauseAnimations : false, 
-            returnToRest : false, 
-            computeBonesUsingShaders : true, 
-            useAllBones : false,
-            displayMode :  BABYLON.Debug.SkeletonViewer.DISPLAY_SPHERE_AND_SPURS,
-            displayOptions : {
-                sphereBaseSize : 1,
-                sphereScaleUnit : 10, 
-                sphereFactor : 0.9, 
-                midStep : 0.25,
-                midStepFactor : 0.05
-            }
-        }
-        
-        new BABYLON.Debug.SkeletonViewer(
-            g_skeleton, 
-            g_mesh,
-            g_scene,
-            false, //autoUpdateBoneMatrices?
-            (g_mesh.renderingGroupId > 0 )?g_mesh.renderingGroupId+1:1,  // renderingGroup
-            options
-        )
-        
-        if (showAxis)
-            new BABYLON.AxesViewer(g_scene, 0.25)
-
-        if (showLayer)
-            g_scene.debugLayer.show()
-        
-        //g_scene.beginAnimation(skeleton, 0, 300, true)    
-        
-        /* print out bone names    
-        let index = 0
-        g_skeleton.bones.forEach(
-            bone => {
-                console.log(`${index}:${bone.name}`)
-                index++
-            }
-        )
-        */
-
-        //debug to show hip's (center) location 
-        g_sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameterX: 0.5, 
-                                                                diameterY: 0.2, 
-                                                                diameterZ: 0.2 }, g_scene)
-                    
-        var material = new BABYLON.StandardMaterial(g_scene)
-        material.alpha = 1
-        material.diffuseColor = new BABYLON.Color3(1.0, 0.2, 0.7)
-        g_sphere.material = material
-    }
-
-    var loadArrow = function () {
-        // generate matrix from arrow object
-        g_arrow = BABYLON.MeshBuilder.CreateCylinder('box', { height: 0.2, 
-                                                              diameterTop: 0, 
-                                                              diameterBottom: 0.1, 
-                                                              tessellation: 6 },  g_scene)
-                                                           
-        g_arrow.position.x = 1.5
-        g_arrow.position.y = 2
-        g_arrow.visibility = false    
-    }
-
     var loadScene = function (path, model) {
     
         BABYLON.SceneLoader.ImportMesh("", path, model, g_scene,
@@ -118,19 +51,34 @@ export default function Babylon3D(props) {
                 g_skeleton = skeletons[0]
                 g_mesh = meshes[0]
 
-                loadArrow()
-                //debugScene()
- 
+                CreateRotationAgent(g_scene)
+                DebugScene(g_scene, g_mesh, g_skeleton)
+
+                //InitBoneVectors(g_skeleton.bones)
+
+                let index = 9
+                let bones = g_skeleton.bones
+                //let matrix = bones[index].getRestPose() 
+
+                console.log(g_skeleton.bones[index])
+                let vector = new BABYLON.Vector3(bones[index].getPosition().x, 
+                                                 bones[index].getPosition().y,
+                                                 bones[index].getPosition().z)
+
+                let landmark = vector//BABYLON.Vector3.TransformCoordinates(vector, matrix).scale(1.0)
+
+                SetSpherePos(landmark)
+                
                 g_scene.beforeRender = function () {
-                    g_arrow.rotation.y = Math.PI/3
-                    let matrix = g_arrow.getWorldMatrix()
-                    g_skeleton.bones[34].setRotationMatrix(matrix)
+                    let matrix = GetRotationMatrix(0, Math.PI/3, 0)
+                    g_skeleton.bones[10].setRotationMatrix(matrix)
                     g_skeleton.bones[11].setRotationMatrix(matrix)
                     g_mesh.rotation.y = Math.PI
 
-                    if (g_sphere !== null && g_center !== null) {
+                    //DEBUG STUFF! draw landmark position by sphere
+                    if (g_center !== null) {
                         //console.log(g_center)
-                        g_sphere.position = g_center
+                        SetSpherePos(g_center)
                         g_center = null
                     }
                 }
