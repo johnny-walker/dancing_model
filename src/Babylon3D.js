@@ -2,8 +2,8 @@ import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
 import {TransformLandmarks, GetPoseCenter} from './utility/dummy3.js'
-import {CreateRotationAgent, GetRotationMatrix} from './utility/rotation.js'
-import {DebugScene, SetSpherePos} from './utility/debugging.js'
+import {CreateRotationAgent, GetRotationMatrix, GetAlignmentMatrix} from './utility/rotation.js'
+import {DebugScene} from './utility/debugging.js'
 
 let g_engine = null
 let g_scene = null
@@ -51,34 +51,24 @@ export default function Babylon3D(props) {
                 g_skeleton = skeletons[0]
                 g_mesh = meshes[0]
 
+                //console.log(g_skeleton.bones)
                 CreateRotationAgent(g_scene)
-                DebugScene(g_scene, g_mesh, g_skeleton)
+                DebugScene(g_scene, g_mesh, g_skeleton, false, true, true, false)
+                let index = 11
+                let U = g_skeleton.bones[index].getPosition()
+                let V = new BABYLON.Vector3(-1, -1, -1)
 
-                //InitBoneVectors(g_skeleton.bones)
+                let matrix = GetAlignmentMatrix(U.normalize(), V.normalize())
+                console.log(matrix)
 
-                let index = 9
-                let bones = g_skeleton.bones
-                //let matrix = bones[index].getRestPose() 
+                g_skeleton.bones[index].setRotationMatrix(matrix)
 
-                console.log(g_skeleton.bones[index])
-                let vector = new BABYLON.Vector3(bones[index].getPosition().x, 
-                                                 bones[index].getPosition().y,
-                                                 bones[index].getPosition().z)
-
-                let landmark = vector//BABYLON.Vector3.TransformCoordinates(vector, matrix).scale(1.0)
-
-                SetSpherePos(landmark)
-                
                 g_scene.beforeRender = function () {
-                    let matrix = GetRotationMatrix(0, Math.PI/3, 0)
-                    g_skeleton.bones[10].setRotationMatrix(matrix)
-                    g_skeleton.bones[11].setRotationMatrix(matrix)
                     g_mesh.rotation.y = Math.PI
 
                     //DEBUG STUFF! draw landmark position by sphere
                     if (g_center !== null) {
                         //console.log(g_center)
-                        SetSpherePos(g_center)
                         g_center = null
                     }
                 }

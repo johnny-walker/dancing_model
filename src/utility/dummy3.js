@@ -113,43 +113,6 @@ let scaling = null
 let boneVectors = []
 let blazePoses = []
 
-export const InitBoneVectors = (bones) => {
-    for (let i=0; i<bones.length; i++ ) {
-        let index = 0
-        bones[i].children.forEach(
-            child => {
-                let vector = new BABYLON.Vector3(child.position.x - bones[i].position.x, 
-                                                 child.position.y - bones[i].position.y,
-                                                 child.position.z - bones[i].position.z)
-                boneVectors.push(vector)
-                console.log(`${child.position}<-${ bones[i].position}`)
-                console.log(`${index}:${bones[i].name}, ${child.name}, ${vector}`)
-                index++
-            }
-        )
-    }
-}
-
-//algin video's person with 3D model 
-//3d model's 3D origin(center) is at hip
-//detected video skeleton should align with 3D model's center, as well as aling the scale of the body
-
-const initLandmarkAlginment = (landmarks) => {
-    //video y-axis positive direction is down (upside down with 3d model's y-axis) 
-    alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
-
-    //3d model's hip location is 1 meter height
-    //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
-    let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
-    if (height_of_hip !== undefined) {
-        scaling = 1.0 / height_of_hip
-        let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
-        alignMatrix.setTranslation(displacement)   
-    } else {
-        console.log('warning: landmarks info NAN...')
-    }
-}
-
 export const TransformLandmarks = (landmarks) => {
     blazePoses = []
     initLandmarkAlginment(landmarks)
@@ -181,4 +144,24 @@ export const GetPosePosition = (index) => {
         ret = blazePoses[index]
     }
     return ret
+}
+
+//algin video's person with 3D model 
+//3d model's 3D origin(center) is at hip
+//detected video skeleton should align with 3D model's center, as well as aling the scale of the body
+
+const initLandmarkAlginment = (landmarks) => {
+    //video y-axis positive direction is down (upside down with 3d model's y-axis) 
+    alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
+
+    //3d model's hip location is 1 meter height
+    //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
+    let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
+    if (height_of_hip !== undefined) {
+        scaling = 1.0 / height_of_hip
+        let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
+        alignMatrix.setTranslation(displacement)   
+    } else {
+        console.log('warning: landmarks info NAN...')
+    }
 }
