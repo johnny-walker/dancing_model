@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
-import {TransformLandmarks, GetPoseCenter} from './utility/dummy3.js'
-import {CreateRotationAgent, GetRotationMatrix, GetAlignmentMatrix} from './utility/rotation.js'
+import {TransformLandmarks, GetBoneDirection, GetPoseCenter} from './utility/dummy3.js'
+import {CreateRotationAgent, GetAlignmentMatrix} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
 
 let g_engine = null
@@ -50,32 +50,41 @@ export default function Babylon3D(props) {
                 g_helper.setMainColor(BABYLON.Color3.Gray())
                 g_skeleton = skeletons[0]
                 g_mesh = meshes[0]
+                let bones = g_skeleton.bones
 
                 //console.log(g_skeleton.bones)
                 CreateRotationAgent(g_scene)
-                DebugScene(g_scene, g_mesh, g_skeleton, false, true, true, false)
-                let index = 11
-                let U = g_skeleton.bones[index].getPosition()
-                let V = new BABYLON.Vector3(-1, -1, -1)
-
-                let matrix = GetAlignmentMatrix(U.normalize(), V.normalize())
-                console.log(matrix)
-
-                g_skeleton.bones[index].setRotationMatrix(matrix)
+                //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
+                DebugScene(g_scene, g_mesh, g_skeleton, false, false, true, false)
 
                 g_scene.beforeRender = function () {
+                    if (g_center !== null) {
+                        let matrix = new BABYLON.Matrix.Identity()
+                        for (let i=0; i< bones.length; i++) {
+                            let V = GetBoneDirection(i)
+                            if (V !== null) {
+                                let U = bones[i].getPosition()
+                                if (i === 57 || i === 62){
+                                    U = new BABYLON.Vector3(0, 1, 0)
+                                    matrix = GetAlignmentMatrix(U, V)
+                                } else {
+                                    matrix = GetAlignmentMatrix(U, V)
+                                }
+
+                                bones[i].setRotationMatrix(matrix) 
+                            }
+                        }
+                        //g_center = null
+                    }
+
+                    // rotate the whole mesh
                     g_mesh.rotation.y = Math.PI
 
-                    //DEBUG STUFF! draw landmark position by sphere
-                    if (g_center !== null) {
-                        //console.log(g_center)
-                        g_center = null
-                    }
                 }
 
                 //render loop
                 g_engine.runRenderLoop(function(){
-                    if (g_scene) { 
+                    if (g_scene && g_center) { 
                         g_scene.render() 
                     }
                 })
@@ -120,6 +129,7 @@ export const UpdateKeypoints = (bones) => {
         console.log("UpdateKeypoints:: wrong paramenter")
         return
     }
+    // convert BlazePose's landmarks space to Babylon World Space
     TransformLandmarks(bones)
     g_center = GetPoseCenter()
 }

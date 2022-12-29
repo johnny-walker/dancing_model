@@ -5,7 +5,7 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 import {UpdateKeypoints} from "./Babylon3D.js"
 
-let detectorInvoked = true
+let detectorInvoked = false
 let warmUp = false
 let timer = null
 
@@ -40,7 +40,7 @@ function BlazePose(props) {
         }
 
         const video = document.getElementById('dance_video')
-        //video.pause()
+        video.pause()
 
         const timestamp = performance.now()
         let poses = await detector.estimatePoses(video)

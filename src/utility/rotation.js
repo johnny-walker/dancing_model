@@ -30,8 +30,11 @@ export const GetRotationMatrix = function (alpha, beta, gamma) {
 // U: original directon
 // V: new direction
 export const GetAlignmentMatrix = (U, V) => {
-    const axis = BABYLON.Vector3.Cross(U, V)
-    const cosA = BABYLON.Vector3.Dot( U, V )
+    let nU = U.normalize()
+    let nV = V.normalize()
+
+    const axis = BABYLON.Vector3.Cross(nV, nU)
+    const cosA = BABYLON.Vector3.Dot( nU, nV )
     const k = 1.0 / (1.0 + cosA)
 
     let mat = new BABYLON.Matrix.Identity()
