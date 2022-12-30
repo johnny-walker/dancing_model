@@ -6,8 +6,11 @@ import '@mediapipe/pose'
 import {UpdateKeypoints} from "./Babylon3D.js"
 
 let detectorInvoked = false
-let warmUp = false
+let resumePlayback = false
+let warmedUp = false
 let timer = null
+
+let g_pose = null
 
 function BlazePose(props) {
     let detector = null
@@ -32,10 +35,11 @@ function BlazePose(props) {
         timer = window.setInterval(estimatePose, 100)   // delay for 0.1 sec
     }
 
-   
+
     var estimatePose = async function() {
-        if (!warmUp) {
-            console.log('3D POSE warmup detecting...')
+        if (!warmedUp) 
+        {
+            console.log('3D POSE warm up detecting...')
             clearTimeout(timer)
         }
 
@@ -45,23 +49,37 @@ function BlazePose(props) {
         const timestamp = performance.now()
         let poses = await detector.estimatePoses(video)
 
-        if (!warmUp) {
+        if (!warmedUp) {
+            g_pose = poses[0]
             console.log('3D POSE frist detecting done...')
-            warmUp = true
             console.log(performance.now() - timestamp)
+            warmedUp = true
         }
 
-        //console.log(poses[0]?.keypoints3D)
-        if ( poses[0] !== undefined ) {
-            UpdateKeypoints(poses[0].keypoints3D)
+        if (resumePlayback && poses[0] !== undefined) {
+            g_pose = poses[0]
+            video.play()
+            console.log(g_pose)
+        } 
+
+        if ( g_pose !== undefined ) {
+            UpdateKeypoints(g_pose.keypoints3D)
         }
 
-        video.play()
+        //timer = window.setInterval(estimatePose, 100)
         window.requestAnimationFrame(estimatePose)
     }
 
+    const clickToPlayPause = () => {
+        resumePlayback = !resumePlayback 
+    }
+
+
     useEffect(() => {
         console.log('BlazePose mounted')
+
+        const video = document.getElementById('dance_video')
+        video.addEventListener('click', clickToPlayPause, true) 
 
         // Load the 3D engine
         if (!detectorInvoked) {
@@ -71,6 +89,7 @@ function BlazePose(props) {
         
         return () => {
             console.log('BlazePose unmounted')
+            video.addEventListener("click", null, true)
         }
     }) 
 

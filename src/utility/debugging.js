@@ -1,12 +1,8 @@
 import * as BABYLON from 'babylonjs'
 
-let g_scene = null
-let g_mesh = null
 let g_skeleton = null
 let g_sphere = null
 export const  DebugScene = function (scene, mesh, skeleton, showSphere=true, showViewer=true, showAxis=true, showLayer=false) {
-    g_scene = scene
-    g_mesh = mesh
     g_skeleton = skeleton
     //debug to show landmark location 
     if (showSphere) {
@@ -43,7 +39,7 @@ export const  DebugScene = function (scene, mesh, skeleton, showSphere=true, sho
             (mesh.renderingGroupId > 0 ) ? mesh.renderingGroupId+1:1,  // renderingGroup
             options
         )
-        }
+    }
 
     if (showAxis) {
         new BABYLON.AxesViewer(scene, 0.25)

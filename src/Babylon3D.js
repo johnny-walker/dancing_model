@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
-import {TransformLandmarks, GetBoneDirection, GetPoseCenter} from './utility/dummy3.js'
-import {CreateRotationAgent, GetAlignmentMatrix} from './utility/rotation.js'
+import {TransformLandmarks, RotateBones, SpinBody, GetPoseCenter} from './utility/dummy3.js'
+import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
 
 let g_engine = null
@@ -11,7 +11,6 @@ let g_skeleton = null
 let g_mesh = null
 let g_helper = null
 let g_center = null
-
 
 export default function Babylon3D(props) {
     let width = props.width
@@ -55,37 +54,22 @@ export default function Babylon3D(props) {
                 //console.log(g_skeleton.bones)
                 CreateRotationAgent(g_scene)
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
-                DebugScene(g_scene, g_mesh, g_skeleton, false, false, true, false)
+                DebugScene(g_scene, g_mesh, g_skeleton, false, false, false, false)
 
                 g_scene.beforeRender = function () {
                     if (g_center !== null) {
-                        let matrix = new BABYLON.Matrix.Identity()
-                        for (let i=0; i< bones.length; i++) {
-                            let V = GetBoneDirection(i)
-                            if (V !== null) {
-                                let U = bones[i].getPosition()
-                                if (i === 57 || i === 62){
-                                    U = new BABYLON.Vector3(0, 1, 0)
-                                    matrix = GetAlignmentMatrix(U, V)
-                                } else {
-                                    matrix = GetAlignmentMatrix(U, V)
-                                }
-
-                                bones[i].setRotationMatrix(matrix) 
-                            }
-                        }
-                        //g_center = null
+                        RotateBones(bones)
+                        SpinBody(bones) 
                     }
-
                     // rotate the whole mesh
                     g_mesh.rotation.y = Math.PI
-
                 }
 
                 //render loop
                 g_engine.runRenderLoop(function(){
                     if (g_scene && g_center) { 
                         g_scene.render() 
+                        g_center = null
                     }
                 })
             }
