@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
+import {SetCallback} from './BlazePose.js'
 import {TransformLandmarks, RotateBones, SpinBody, GetPoseCenter} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
+
 
 let g_engine = null
 let g_scene = null
@@ -88,8 +90,20 @@ export default function Babylon3D(props) {
         loadScene(path, model)
     }
 
+    const updateKeypoints = (bones) => {
+        if (bones === undefined || bones.length !== 33) {
+            // BlazePose detecting result should contain 33 landmarks
+            console.log("UpdateKeypoints:: wrong paramenter")
+            return
+        }
+        // convert BlazePose's landmarks space to Babylon World Space
+        TransformLandmarks(bones)
+        g_center = GetPoseCenter()
+    }
+    
     useEffect(() => {
         console.log('3D model mounted')
+        SetCallback(updateKeypoints)
         // Load the 3D engine
         if (g_engine === null) {
             initEngine()
@@ -107,13 +121,3 @@ export default function Babylon3D(props) {
     )
 }
 
-export const UpdateKeypoints = (bones) => {
-    if (bones === undefined || bones.length !== 33) {
-        // BlazePose detecting result should contain 33 landmarks
-        console.log("UpdateKeypoints:: wrong paramenter")
-        return
-    }
-    // convert BlazePose's landmarks space to Babylon World Space
-    TransformLandmarks(bones)
-    g_center = GetPoseCenter()
-}

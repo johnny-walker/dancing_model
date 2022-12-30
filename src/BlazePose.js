@@ -3,7 +3,6 @@ import React, { useEffect } from 'react'
 import * as poseDetection from '@tensorflow-models/pose-detection'
 import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
-import {UpdateKeypoints} from "./Babylon3D.js"
 
 let detectorInvoked = false
 let resumePlayback = false
@@ -11,6 +10,7 @@ let warmedUp = false
 let timer = null
 
 let g_pose = null
+let g_funUpdateKeypoints = null
 
 function BlazePose(props) {
     let detector = null
@@ -62,8 +62,8 @@ function BlazePose(props) {
             console.log(g_pose)
         } 
 
-        if ( g_pose !== undefined ) {
-            UpdateKeypoints(g_pose.keypoints3D)
+        if ( g_funUpdateKeypoints && g_pose !== undefined ) {
+            g_funUpdateKeypoints(g_pose.keypoints3D)
         }
 
         //timer = window.setInterval(estimatePose, 100)
@@ -107,4 +107,7 @@ function BlazePose(props) {
     )
 }
 
+export const SetCallback = (updateKeypoints) => {
+    g_funUpdateKeypoints = updateKeypoints
+}
 export default BlazePose
