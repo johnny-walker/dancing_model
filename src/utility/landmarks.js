@@ -1,5 +1,5 @@
 import * as BABYLON from 'babylonjs'
-import {GetBlazePoses} from './dummy3.js'
+
 let g_scene = null
 let vectorReps = []
 const s = 0.01
@@ -31,8 +31,8 @@ const createExtrudeShape = function(poses, from, to, index) {
         fromVec =  poses[from] 
         toVec   = poses[to]    
     }
-    let path = [fromVec, toVec]
 
+    let path = [fromVec, toVec]
     let unitVecRep = null
     unitVecRep = BABYLON.MeshBuilder.ExtrudeShapeCustom("unitVecRep", 
                                                         {shape: shape, 
@@ -41,16 +41,17 @@ const createExtrudeShape = function(poses, from, to, index) {
                                                         scaleFunction: extrudeScaling, 
                                                         }, 
                                                         g_scene)
-    unitVecRep.path = path
-    unitVecRep.scaling = new BABYLON.Vector3(1, 1, 5)
-    let material = new BABYLON.StandardMaterial("redMat")
+    
+    let material = new BABYLON.StandardMaterial("Material")
     material.diffuseColor = colors[index]
+
+    unitVecRep.scaling = new BABYLON.Vector3(1, 1, 5)
     unitVecRep.material = material
     unitVecRep.position.x += 0.8
     vectorReps.push(unitVecRep)
 }
 
-export const DrawLandmarks = function (scene) {
+export const DrawLandmarks = function (scene, poses) {
     g_scene = scene
     vectorReps.forEach(
         vRep => {
@@ -59,7 +60,6 @@ export const DrawLandmarks = function (scene) {
     )
     vectorReps = []
 
-    let poses = GetBlazePoses()
     //head
     createExtrudeShape(poses, 0, 2, 5)
     createExtrudeShape(poses, 0, 5, 5)

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
 import {SetCallback} from './BlazePose.js'
-import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses, GetModelBones} from './utility/dummy3.js'
+import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
 import {DrawLandmarks} from './utility/landmarks.js'
@@ -67,7 +67,8 @@ export default function Babylon3D(props) {
                 g_scene.beforeRender = function () {
                     if (g_center !== null) {
                         RotateSpinBody(bones)
-                        DrawLandmarks(g_scene)
+                        let poses = GetBlazePoses()
+                        DrawLandmarks(g_scene, poses)
                     }
                 }
 

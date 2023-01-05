@@ -3,8 +3,8 @@ import * as BABYLON from 'babylonjs'
 import {GetAlignmentMatrix, GetRotationMatrix} from './rotation.js'
 
 let alignMatrix = null
-let scaling = null
-let scalingUp = null
+//let scaling = null
+//let scalingUp = null
 
 let NUMBER_OF_LANDMARKS = 33
 let NUMBER_OF_BONES = 67
@@ -24,8 +24,8 @@ export const TransformLandmarks = (landmarks) => {
         let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
         let hip_to_head = ( (landmarks[23].y-landmarks[1].y) + (landmarks[23].y-landmarks[1].y) ) / 2  
         if (height_of_hip !== undefined && hip_to_head !== undefined) {
-            scaling = 1.0 / height_of_hip 
-            scalingUp = 0.8 / hip_to_head
+            //scaling = 1.0 / height_of_hip 
+            //scalingUp = 0.8 / hip_to_head
             let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
             alignMatrix.setTranslation(displacement)   
         } else {
@@ -45,8 +45,8 @@ export const TransformLandmarks = (landmarks) => {
 
     for (let i=0; i<landmarks.length; i++ ) {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
-        let optScaling = i<20 ? scaling : scalingUp
-        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(optScaling)
+        //let fScaling = i<20 ? scaling : scalingUp
+        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(fScaling)
         blazePoses.push(landmark)
     }
 
@@ -143,9 +143,9 @@ const spinBody = (bones) => {
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
-    angle = getBodySpinAngle(1)/2
+    angle = getBodySpinAngle(1)/3
     matrix = GetRotationMatrix(0, angle, 0)
-    //bones[0].setRotationMatrix(matrix) 
+    bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
 
 }
