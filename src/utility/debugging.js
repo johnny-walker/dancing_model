@@ -7,8 +7,8 @@ export const  DebugScene = function (scene, mesh, skeleton, showSphere=true, sho
     //debug to show landmark location 
     if (showSphere) {
         g_sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameterX: 0.1, 
-                                                            diameterY: 0.1, 
-                                                            diameterZ: 0.1 }, scene)
+                                                                diameterY: 0.1, 
+                                                                diameterZ: 0.1 }, scene)
                     
         var material = new BABYLON.StandardMaterial(scene)
         material.alpha = 1

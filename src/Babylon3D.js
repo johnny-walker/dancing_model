@@ -2,9 +2,10 @@ import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
 import {SetCallback} from './BlazePose.js'
-import {TransformLandmarks, RotateBones, SpinBody, GetPoseCenter} from './utility/dummy3.js'
+import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses, GetModelBones} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
+import {DrawLandmarks} from './utility/landmarks.js'
 
 
 let g_engine = null
@@ -44,32 +45,35 @@ export default function Babylon3D(props) {
     
         BABYLON.SceneLoader.ImportMesh("", path, model, g_scene,
             function (meshes, particleSystems, skeletons) {          
+                g_skeleton = skeletons[0]
+                g_mesh = meshes[0]
                 g_scene.createDefaultCameraOrLight(true, true, true)
-                var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
+                let light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
                 light.intensity = 1.0
                 g_helper = g_scene.createDefaultEnvironment()
                 g_helper.setMainColor(BABYLON.Color3.Gray())
-                g_skeleton = skeletons[0]
-                g_mesh = meshes[0]
+
                 let bones = g_skeleton.bones
 
+                //console.log(g_scene.cameras[0])
+                g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 1.2, 4.5))
+                g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)
+ 
                 //console.log(g_skeleton.bones)
                 CreateRotationAgent(g_scene)
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
                 DebugScene(g_scene, g_mesh, g_skeleton, false, false, false, false)
-
+                            
                 g_scene.beforeRender = function () {
                     if (g_center !== null) {
-                        RotateBones(bones)
-                        SpinBody(bones) 
+                        RotateSpinBody(bones)
+                        DrawLandmarks(g_scene)
                     }
-                    // rotate the whole mesh
-                    g_mesh.rotation.y = Math.PI
                 }
 
                 //render loop
                 g_engine.runRenderLoop(function(){
-                    if (g_scene && g_center) { 
+                    if (g_scene) { 
                         g_scene.render() 
                         g_center = null
                     }
@@ -90,17 +94,7 @@ export default function Babylon3D(props) {
         loadScene(path, model)
     }
 
-    const updateKeypoints = (bones) => {
-        if (bones === undefined || bones.length !== 33) {
-            // BlazePose detecting result should contain 33 landmarks
-            console.log("UpdateKeypoints:: wrong paramenter")
-            return
-        }
-        // convert BlazePose's landmarks space to Babylon World Space
-        TransformLandmarks(bones)
-        g_center = GetPoseCenter()
-    }
-    
+    // constructor, destructor
     useEffect(() => {
         console.log('3D model mounted')
         SetCallback(updateKeypoints)
@@ -113,6 +107,18 @@ export default function Babylon3D(props) {
             console.log('3D model unmounted')
         }
     }) 
+
+    // callback function
+    const updateKeypoints = (bones) => {
+        if (bones === undefined || bones.length !== 33) {
+            // BlazePose detecting result should contain 33 landmarks
+            console.log("UpdateKeypoints:: wrong paramenter")
+            return
+        }
+        // convert BlazePose's landmarks space to Babylon World Space
+        TransformLandmarks(bones)
+        g_center = GetPoseCenter()
+    }
 
     return (
         <div>

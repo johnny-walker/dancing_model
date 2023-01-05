@@ -4,22 +4,49 @@ import {GetAlignmentMatrix, GetRotationMatrix} from './rotation.js'
 
 let alignMatrix = null
 let scaling = null
+let scalingUp = null
 
-let blazePoses = [] //33
-let modelBones = [] //67
+let NUMBER_OF_LANDMARKS = 33
+let NUMBER_OF_BONES = 67
+
+let blazePoses = [] //store revised transformation results of the 33 landmarks    
+let modelBones = [] //store detected direction of aligned 3D model's 67 bones
 
 export const TransformLandmarks = (landmarks) => {
+    //algin video's person with 3D model 
+    //3d model's 3D origin(center) is at hip
+    //detected video skeleton should align with 3D model's center, as well as aling the scale of the body
+    const initLandmarkAlginment = (landmarks) => {
+        //video y-axis positive direction is down (upside down with 3d model's y-axis) 
+        alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
+        //3d model's hip location is 1 meter height
+        //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
+        let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
+        let hip_to_head = ( (landmarks[23].y-landmarks[1].y) + (landmarks[23].y-landmarks[1].y) ) / 2  
+        if (height_of_hip !== undefined && hip_to_head !== undefined) {
+            scaling = 1.0 / height_of_hip 
+            scalingUp = 0.8 / hip_to_head
+            let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
+            alignMatrix.setTranslation(displacement)   
+        } else {
+            console.log('warning: landmarks info NAN...')
+        }
+    }
+    
     blazePoses = []
     modelBones = []
 
-    for (let i=0; i< 67; i++) {
+    for (let i=0; i< NUMBER_OF_BONES; i++) {
         modelBones.push(null)
     }
 
-    initLandmarkAlginment(landmarks)
+    //if (alignMatrix === null)
+        initLandmarkAlginment(landmarks)
+
     for (let i=0; i<landmarks.length; i++ ) {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
-        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix).scale(scaling)
+        let optScaling = i<20 ? scaling : scalingUp
+        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(optScaling)
         blazePoses.push(landmark)
     }
 
@@ -31,29 +58,22 @@ export const TransformLandmarks = (landmarks) => {
     //transformLeftLeg(blazePoses)
 }
 
-//algin video's person with 3D model 
-//3d model's 3D origin(center) is at hip
-//detected video skeleton should align with 3D model's center, as well as aling the scale of the body
+export const RotateSpinBody = (bones) => {
+    rotateBones(bones)
+    spinBody(bones)
+}
 
-const initLandmarkAlginment = (landmarks) => {
-    //video y-axis positive direction is down (upside down with 3d model's y-axis) 
-    alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
-
-    //3d model's hip location is 1 meter height
-    //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
-    let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
-    if (height_of_hip !== undefined) {
-        scaling = 1.0 / height_of_hip
-        let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
-        alignMatrix.setTranslation(displacement)   
-    } else {
-        console.log('warning: landmarks info NAN...')
+export const GetLandmarkDirection = (index) => {
+    let ret = null
+    if (index < modelBones.length) {
+        ret = modelBones[index]
     }
+    return ret
 }
 
 export const GetPoseCenter = () => {
     let ret = null
-    if (blazePoses.length === 33) {
+    if (blazePoses.length === NUMBER_OF_LANDMARKS) {
         ret = new BABYLON.Vector3( (blazePoses[23].x + blazePoses[24].x)/2,
                                    (blazePoses[23].y + blazePoses[24].y)/2,
                                    (blazePoses[23].z + blazePoses[24].z)/2 ) //center
@@ -65,43 +85,71 @@ export const GetPoseCenter = () => {
     return ret
 }
 
-export const GetBoneDirection = (index) => {
-    let ret = null
-    if (index < modelBones.length) {
-        ret = modelBones[index]
-    }
-    return ret
+export const GetModelBones = () => {
+    return modelBones
 }
-export const RotateBones = (bones) => {
-    let matrix = null
+
+export const GetBlazePoses = () => {
+    return blazePoses
+}
+
+const rotateBones = (bones) => {
+    const globalRotation = (bone, vector) => {
+        let currentBone = bone
+        let V = vector
+        let index = 0
+    
+        while ( currentBone.getParent() !== null) {
+            if (currentBone.name === 'mixamorig:Spine2' ||
+                currentBone.name === 'mixamorig:Hips')
+                break
+            currentBone = currentBone.getParent()
+            let invMatrix = currentBone.getRotationMatrix()//.invert()
+            console.log(invMatrix)
+            console.log(`${index}: ${currentBone.name}`)
+            index += 1
+            V = BABYLON.Vector3.TransformCoordinates(V, invMatrix)
+        }
+        return V
+    }
+
+    let matrix = new BABYLON.Matrix.Identity()
     for (let i=0; i< bones.length; i++) {
-        let V = GetBoneDirection(i)
+        let V = GetLandmarkDirection(i)
         if (V !== null) {
             let U = bones[i].getPosition()
-            if (i === 57 || i === 62){
+            //U = globalRotation(bones[i], U) //global space to local space
+            if (i === 57 || i === 62){  // hip-leg bones
                 U = new BABYLON.Vector3(0, 1, 0)
                 matrix = GetAlignmentMatrix(U, V)
             } else {
                 matrix = GetAlignmentMatrix(U, V)
             }
+            //let orgMatrix = bones[i].getRotationMatrix()
+            //console.log(`${i}: ${bones[i].name}`)
+            //console.log(orgMatrix)
+            //let matrix2 = new BABYLON.Matrix.Identity()
+            //matrix2 = matrix.multiply(orgMatrix)    
             bones[i].setRotationMatrix(matrix) 
         }
     }    
 }
-export const SpinBody = (bones) => {
-    // rotate shoulder
+
+const spinBody = (bones) => {
+    // spin upper body
     let angle = getBodySpinAngle(0)/2
     let matrix = GetRotationMatrix(0, angle, 0)
     //bones[2].setRotationMatrix(matrix) 
     bones[3].setRotationMatrix(matrix) 
 
-    // rotate hip
+    // spin hip
     angle = getBodySpinAngle(1)/2
     matrix = GetRotationMatrix(0, angle, 0)
     //bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
 
 }
+
 const getBodySpinAngle = (index) => {
     let ret = null
     if ( index === 0 ) {
@@ -120,10 +168,11 @@ const getBodySpinAngle = (index) => {
     return angle
 }
 
-/*
+
+/* bones info
 let BoneNames = {
     0: 'mixamorig:Hips',
-    1: 'mixamorig:Spine',
+    1: 'mixamorig:Spine', 
     2: 'mixamorig:Spine1',
     3: 'mixamorig:Spine2',
     4: 'mixamorig:Neck',
@@ -224,7 +273,7 @@ const transformHead = (landmarks) => {
     let keypoint2 = new BABYLON.Vector3(landmarks[0].x-keypoint1.x, 
                                         landmarks[0].y-keypoint1.y, 
                                         landmarks[0].z-keypoint1.z)    
-    modelBones[5] = keypoint2   
+    //modelBones[5] = keypoint2   
 
     //6: 'mixamorig:HeadTop_End'    
     //7: 'mixamorig:LeftEye'
@@ -263,7 +312,7 @@ const transformLeftHand = (landmarks) => {
     keypoint1 = new BABYLON.Vector3(landmarks[19].x-landmarks[15].x, 
                                     landmarks[19].y-landmarks[15].y, 
                                     landmarks[19].z-landmarks[15].z)
-    modelBones[12] = keypoint1    
+    //modelBones[12] = keypoint1    
 
     /*
     13:'mixamorig:LeftHandMiddle1',
@@ -311,7 +360,7 @@ const transformRightHand = (landmarks) => {
     keypoint1 = new BABYLON.Vector3(landmarks[20].x-landmarks[16].x, 
                                     landmarks[20].y-landmarks[16].y, 
                                     landmarks[20].z-landmarks[16].z)
-    modelBones[36] = keypoint1  
+    //modelBones[36] = keypoint1  
 
     /*
     37:'mixamorig:RightHandMiddle1',
@@ -390,3 +439,4 @@ const transformLeftLeg = (landmarks) => {
     //modelBones[65] = keypoint1  
     //66:'mixamorig:LeftToe_End'
 }
+

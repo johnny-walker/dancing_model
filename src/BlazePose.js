@@ -18,7 +18,7 @@ function BlazePose(props) {
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
     let width  = props.width  -  props.width  % 32
     let height = props.height -  props.height % 32
-    console.log('res:('+width+','+height+')')
+    console.log(`res: ${width}x${height}`)
     var initDetector = async function() {
         const model = poseDetection.SupportedModels.BlazePose
         const detectorConfig =  {
@@ -37,9 +37,9 @@ function BlazePose(props) {
 
 
     var estimatePose = async function() {
-        if (!warmedUp) 
+        //if (!warmedUp) 
         {
-            console.log('3D POSE warm up detecting...')
+            //console.log('3D POSE warm up detecting...')
             clearTimeout(timer)
         }
 
@@ -59,18 +59,18 @@ function BlazePose(props) {
         if (resumePlayback && poses[0] !== undefined) {
             g_pose = poses[0]
             video.play()
-            console.log(g_pose)
+            //console.log(g_pose)
         } 
 
         if ( g_funUpdateKeypoints && g_pose !== undefined ) {
             g_funUpdateKeypoints(g_pose.keypoints3D)
         }
 
-        //timer = window.setInterval(estimatePose, 100)
-        window.requestAnimationFrame(estimatePose)
+        timer = window.setInterval(estimatePose, 250)
+        //window.requestAnimationFrame(estimatePose)
     }
 
-    const clickToPlayPause = () => {
+    const onClickVideo = () => {
         resumePlayback = !resumePlayback 
     }
 
@@ -79,7 +79,7 @@ function BlazePose(props) {
         console.log('BlazePose mounted')
 
         const video = document.getElementById('dance_video')
-        video.addEventListener('click', clickToPlayPause, true) 
+        video.addEventListener('click', onClickVideo, true) 
 
         // Load the 3D engine
         if (!detectorInvoked) {
