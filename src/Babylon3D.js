@@ -56,7 +56,7 @@ export default function Babylon3D(props) {
                 let bones = g_skeleton.bones
 
                 //console.log(g_scene.cameras[0])
-                g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 1.2, 4.5))
+                g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 0.8, 4))
                 g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)
  
                 //console.log(g_skeleton.bones)

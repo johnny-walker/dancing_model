@@ -11,10 +11,10 @@ const shape = [
               ]
 const colors = [
                 BABYLON.Color3.Purple(),
-                BABYLON.Color3.Magenta(),
                 BABYLON.Color3.Yellow(),
-                new BABYLON.Color3(1.0, 0.7, 0.3),
                 BABYLON.Color3.Red(),
+                new BABYLON.Color3(0.9, 0.5, 0.3),
+                new BABYLON.Color3(0.3, 0.7, 0.9),
                 BABYLON.Color3.Green(),
                 BABYLON.Color3.Blue(),
                ]  
@@ -72,7 +72,7 @@ export const DrawLandmarks = function (scene, poses) {
     createExtrudeShape(poses, 10, 12, 6)
     //body
     createExtrudeShape(poses, 11, 12, 4)
-    createExtrudeShape(poses, 23, 24, 4)
+    createExtrudeShape(poses, 24, 23, 4)
     //left arm
     createExtrudeShape(poses, 23, 11, 0)
     createExtrudeShape(poses, 11, 13, 0)

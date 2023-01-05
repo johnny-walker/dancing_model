@@ -47,6 +47,7 @@ export const TransformLandmarks = (landmarks) => {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
         //let fScaling = i<20 ? scaling : scalingUp
         landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(fScaling)
+        landmark.x = - landmark.x
         blazePoses.push(landmark)
     }
 
@@ -143,9 +144,9 @@ const spinBody = (bones) => {
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
-    angle = getBodySpinAngle(1)/3
+    angle = getBodySpinAngle(1)/2
     matrix = GetRotationMatrix(0, angle, 0)
-    bones[0].setRotationMatrix(matrix) 
+    //bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
 
 }
@@ -163,83 +164,10 @@ const getBodySpinAngle = (index) => {
                                   blazePoses[23].y-blazePoses[24].y, 
                                   blazePoses[23].z-blazePoses[24].z)   
     } 
-    let unitX = new BABYLON.Vector3(1, 0, 0) 
+    let unitX = new BABYLON.Vector3(-1, 0, 0) 
     let angle = Math.acos(BABYLON.Vector3.Dot( ret.normalize(), unitX ))
     return angle
 }
-
-
-/* bones info
-let BoneNames = {
-    0: 'mixamorig:Hips',
-    1: 'mixamorig:Spine', 
-    2: 'mixamorig:Spine1',
-    3: 'mixamorig:Spine2',
-    4: 'mixamorig:Neck',
-    5: 'mixamorig:Head',
-    6: 'mixamorig:HeadTop_End',
-    7: 'mixamorig:LeftEye',
-    8: 'mixamorig:RightEye',
-    9: 'mixamorig:LeftShoulder',
-    10:'mixamorig:LeftArm',
-    11:'mixamorig:LeftForeArm',
-    12:'mixamorig:LeftHand',
-    13:'mixamorig:LeftHandMiddle1',
-    14:'mixamorig:LeftHandMiddle2',
-    15:'mixamorig:LeftHandMiddle3',
-    16:'mixamorig:LeftHandMiddle4',
-    17:'mixamorig:LeftHandThumb1',
-    18:'mixamorig:LeftHandThumb2',
-    19:'mixamorig:LeftHandThumb3',
-    20:'mixamorig:LeftHandThumb4',
-    21:'mixamorig:LeftHandIndex1',
-    22:'mixamorig:LeftHandIndex2',
-    23:'mixamorig:LeftHandIndex3',
-    24:'mixamorig:LeftHandIndex4',
-    25:'mixamorig:LeftHandRing1',
-    26:'mixamorig:LeftHandRing2',
-    27:'mixamorig:LeftHandRing3',
-    28:'mixamorig:LeftHandRing4',
-    29:'mixamorig:LeftHandPinky1',
-    30:'mixamorig:LeftHandPinky2',
-    31:'mixamorig:LeftHandPinky3',
-    32:'mixamorig:LeftHandPinky4',
-    33:'mixamorig:RightShoulder',
-    34:'mixamorig:RightArm',
-    35:'mixamorig:RightForeArm',
-    36:'mixamorig:RightHand',
-    37:'mixamorig:RightHandMiddle1',
-    38:'mixamorig:RightHandMiddle2',
-    39:'mixamorig:RightHandMiddle3',
-    40:'mixamorig:RightHandMiddle4',
-    41:'mixamorig:RightHandThumb1',
-    42:'mixamorig:RightHandThumb2',
-    43:'mixamorig:RightHandThumb3',
-    44:'mixamorig:RightHandThumb4',
-    45:'mixamorig:RightHandIndex1',
-    46:'mixamorig:RightHandIndex2',
-    47:'mixamorig:RightHandIndex3',
-    48:'mixamorig:RightHandIndex4',
-    49:'mixamorig:RightHandRing1',
-    50:'mixamorig:RightHandRing2',
-    51:'mixamorig:RightHandRing3',
-    52:'mixamorig:RightHandRing4',
-    53:'mixamorig:RightHandPinky1',
-    54:'mixamorig:RightHandPinky2',
-    55:'mixamorig:RightHandPinky3',
-    56:'mixamorig:RightHandPinky4',
-    57:'mixamorig:RightUpLeg',
-    58:'mixamorig:RightLeg',
-    59:'mixamorig:RightFoot',
-    60:'mixamorig:RightToeBase',
-    61:'mixamorig:RightToe_End',
-    62:'mixamorig:LeftUpLeg',
-    63:'mixamorig:LeftLeg',
-    64:'mixamorig:LeftFoot',
-    65:'mixamorig:LeftToeBase',
-    66:'mixamorig:LeftToe_End'
-}
-*/
 
 const transformBody = (landmarks) => {
     //0: 'mixamorig:Hips'
@@ -439,4 +367,76 @@ const transformLeftLeg = (landmarks) => {
     //modelBones[65] = keypoint1  
     //66:'mixamorig:LeftToe_End'
 }
+
+/* bones info
+let BoneNames = {
+    0: 'mixamorig:Hips',
+    1: 'mixamorig:Spine', 
+    2: 'mixamorig:Spine1',
+    3: 'mixamorig:Spine2',
+    4: 'mixamorig:Neck',
+    5: 'mixamorig:Head',
+    6: 'mixamorig:HeadTop_End',
+    7: 'mixamorig:LeftEye',
+    8: 'mixamorig:RightEye',
+    9: 'mixamorig:LeftShoulder',
+    10:'mixamorig:LeftArm',
+    11:'mixamorig:LeftForeArm',
+    12:'mixamorig:LeftHand',
+    13:'mixamorig:LeftHandMiddle1',
+    14:'mixamorig:LeftHandMiddle2',
+    15:'mixamorig:LeftHandMiddle3',
+    16:'mixamorig:LeftHandMiddle4',
+    17:'mixamorig:LeftHandThumb1',
+    18:'mixamorig:LeftHandThumb2',
+    19:'mixamorig:LeftHandThumb3',
+    20:'mixamorig:LeftHandThumb4',
+    21:'mixamorig:LeftHandIndex1',
+    22:'mixamorig:LeftHandIndex2',
+    23:'mixamorig:LeftHandIndex3',
+    24:'mixamorig:LeftHandIndex4',
+    25:'mixamorig:LeftHandRing1',
+    26:'mixamorig:LeftHandRing2',
+    27:'mixamorig:LeftHandRing3',
+    28:'mixamorig:LeftHandRing4',
+    29:'mixamorig:LeftHandPinky1',
+    30:'mixamorig:LeftHandPinky2',
+    31:'mixamorig:LeftHandPinky3',
+    32:'mixamorig:LeftHandPinky4',
+    33:'mixamorig:RightShoulder',
+    34:'mixamorig:RightArm',
+    35:'mixamorig:RightForeArm',
+    36:'mixamorig:RightHand',
+    37:'mixamorig:RightHandMiddle1',
+    38:'mixamorig:RightHandMiddle2',
+    39:'mixamorig:RightHandMiddle3',
+    40:'mixamorig:RightHandMiddle4',
+    41:'mixamorig:RightHandThumb1',
+    42:'mixamorig:RightHandThumb2',
+    43:'mixamorig:RightHandThumb3',
+    44:'mixamorig:RightHandThumb4',
+    45:'mixamorig:RightHandIndex1',
+    46:'mixamorig:RightHandIndex2',
+    47:'mixamorig:RightHandIndex3',
+    48:'mixamorig:RightHandIndex4',
+    49:'mixamorig:RightHandRing1',
+    50:'mixamorig:RightHandRing2',
+    51:'mixamorig:RightHandRing3',
+    52:'mixamorig:RightHandRing4',
+    53:'mixamorig:RightHandPinky1',
+    54:'mixamorig:RightHandPinky2',
+    55:'mixamorig:RightHandPinky3',
+    56:'mixamorig:RightHandPinky4',
+    57:'mixamorig:RightUpLeg',
+    58:'mixamorig:RightLeg',
+    59:'mixamorig:RightFoot',
+    60:'mixamorig:RightToeBase',
+    61:'mixamorig:RightToe_End',
+    62:'mixamorig:LeftUpLeg',
+    63:'mixamorig:LeftLeg',
+    64:'mixamorig:LeftFoot',
+    65:'mixamorig:LeftToeBase',
+    66:'mixamorig:LeftToe_End'
+}
+*/
 
