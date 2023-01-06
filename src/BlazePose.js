@@ -5,11 +5,11 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 
 let detectorInvoked = false
-let resumePlayback = false
-let slowMotion = true
+let resumePlayback = true
+let slowMotion = false
 let warmedUp = false
 let timer = null
-let interval = 200
+let interval = 150
 
 let g_pose = null
 let g_funUpdateKeypoints = null
@@ -50,6 +50,7 @@ function BlazePose(props) {
 
         const timestamp = performance.now()
         let poses = await detector.estimatePoses(video)
+        console.log(performance.now() - timestamp)
 
         if (!warmedUp) {
             g_pose = poses[0]

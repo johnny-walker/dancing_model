@@ -5,7 +5,7 @@ import {SetCallback, PlayVideo} from './BlazePose.js'
 import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
-import {DrawLandmarks} from './utility/landmarks.js'
+import {DrawLandmarkWizard} from './utility/landmarks.js'
 
 
 let g_engine = null
@@ -54,8 +54,9 @@ export default function Babylon3D(props) {
                 g_helper.setMainColor(BABYLON.Color3.Gray())
                 g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 0.8, 4))
  
-                // shift the whole model to the right, (visual human is on the left)
-                 g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)  
+                let drawWizard = true
+                let translateY = drawWizard ? 0.8 : 0.0
+                g_mesh.position =  new BABYLON.Vector3(-translateY, 0, 0)  // shift the model
  
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
                 DebugScene(g_scene, g_mesh, g_skeleton, false, false, false, false)
@@ -65,7 +66,10 @@ export default function Babylon3D(props) {
                     if (g_center !== null) {
                         RotateSpinBody(g_skeleton.bones)
                         let poses = GetBlazePoses()
-                        DrawLandmarks(g_scene, poses)
+                        if (drawWizard) {
+                            // shift the wizard (opposite to model) 
+                            DrawLandmarkWizard(g_scene, poses, translateY)  
+                        }
                     }
                 }
                 g_scene.afterRender = function () {

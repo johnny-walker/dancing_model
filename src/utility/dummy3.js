@@ -3,8 +3,6 @@ import * as BABYLON from 'babylonjs'
 import {GetAlignmentMatrix, GetRotationMatrix} from './rotation.js'
 
 let alignMatrix = null
-//let scaling = null
-//let scalingUp = null
 
 let NUMBER_OF_LANDMARKS = 33
 let NUMBER_OF_BONES = 67
@@ -16,16 +14,13 @@ export const TransformLandmarks = (landmarks) => {
     //algin video's person with 3D model 
     //3d model's 3D origin(center) is at hip
     //detected video skeleton should align with 3D model's center, as well as aling the scale of the body
-    const initLandmarkAlginment = (landmarks) => {
+    const landmarkAlignment = (landmarks) => {
         //BlazePose y-axis direction (down is positive) is inverse with Babylon 
         alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
         //3d model's hip location is 1 meter height
-        //align and scale video skeleton's hip, (detected height depends on the distance from camera) 
+        //align skeleton's hip, (detected height depends on the distance from camera) 
         let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
-        let hip_to_head = ( (landmarks[23].y-landmarks[1].y) + (landmarks[23].y-landmarks[1].y) ) / 2  
-        if (height_of_hip !== undefined && hip_to_head !== undefined) {
-            //scaling = 1.0 / height_of_hip 
-            //scalingUp = 0.8 / hip_to_head
+        if (height_of_hip !== undefined ) {
             let displacement = new BABYLON.Vector3(0, height_of_hip, 0)
             alignMatrix.setTranslation(displacement)   
         } else {
@@ -41,12 +36,11 @@ export const TransformLandmarks = (landmarks) => {
     }
 
     if (alignMatrix === null)
-        initLandmarkAlginment(landmarks)
+        landmarkAlignment(landmarks)
 
     for (let i=0; i<landmarks.length; i++ ) {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
-        //let fScaling = i<20 ? scaling : scalingUp
-        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(fScaling)
+        landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)
         // BlazePose x-axis direction is inverse with Babylon
         landmark.x = - landmark.x   
         blazePoses.push(landmark)
@@ -56,8 +50,8 @@ export const TransformLandmarks = (landmarks) => {
     transformHead(blazePoses)
     transformLeftHand(blazePoses)
     transformRightHand(blazePoses)
-    //transformRightLeg(blazePoses)
-    //transformLeftLeg(blazePoses)
+    transformRightLeg(blazePoses)
+    transformLeftLeg(blazePoses)
 }
 
 export const RotateSpinBody = (bones, mesh) => {
@@ -103,8 +97,6 @@ const rotateBones = (bones, mesh) => {
         let parent = bones[i].getParent()
         if (parent !== null) {
             let U = parent.getPosition(BABYLON.Space.WORLD, mesh)
-            //let matrix = parent.getRotationMatrix()
-            //U = BABYLON.Vector3.TransformCoordinates(U, matrix)
             UV = new BABYLON.Vector3(V.x-U.x, V.y-U.y, V.z-U.z)
         } else {
             UV = V
@@ -132,9 +124,9 @@ const rotateBones = (bones, mesh) => {
 
 const spinBody = (bones) => {
     // spin upper body
-    let angle = getBodySpinAngle(0)/2
+    let angle = getBodySpinAngle(0)
     let matrix = GetRotationMatrix(0, angle, 0)
-    //bones[2].setRotationMatrix(matrix) 
+    bones[2].setRotationMatrix(matrix) 
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
@@ -146,20 +138,28 @@ const spinBody = (bones) => {
 }
 
 const getBodySpinAngle = (index) => {
-    let ret = null
+    let direction = null
     if ( index === 0 ) {
         //should spin
-        ret = new BABYLON.Vector3(blazePoses[11].x-blazePoses[12].x, 
-                                  blazePoses[11].y-blazePoses[12].y, 
-                                  blazePoses[11].z-blazePoses[12].z)   
+        direction = new BABYLON.Vector3(blazePoses[12].x-blazePoses[11].x, 
+                                        blazePoses[12].y-blazePoses[11].y, 
+                                        blazePoses[12].z-blazePoses[11].z)   
     } else if ( index === 1 ) {
         //hip spin
-        ret = new BABYLON.Vector3(blazePoses[23].x-blazePoses[24].x, 
-                                  blazePoses[23].y-blazePoses[24].y, 
-                                  blazePoses[23].z-blazePoses[24].z)   
+        direction = new BABYLON.Vector3(blazePoses[24].x-blazePoses[23].x, 
+                                        blazePoses[24].y-blazePoses[23].y, 
+                                        blazePoses[24].z-blazePoses[23].z)   
     } 
-    let unitX = new BABYLON.Vector3(-1, 0, 0) 
-    let angle = Math.acos(BABYLON.Vector3.Dot( ret.normalize(), unitX ))
+    // calculate angle
+    let unitX = new BABYLON.Vector3(1, 0, 0) 
+    let projXZ = new BABYLON.Vector3(direction.x, 0, direction.z).normalize() 
+    let AdotB = BABYLON.Vector3.Dot(unitX, projXZ)
+    let angle = Math.acos(AdotB)
+    
+    // calculate sign, acos range between 0 ~ pie, must judge the sign
+    let AxB =  BABYLON.Vector3.Cross(unitX, projXZ)
+    angle = (AxB.y<0) ? -angle : angle
+
     return angle
 }
 
@@ -243,9 +243,9 @@ const transformLeftHand = (landmarks) => {
     //20:'mixamorig:LeftHandThumb4'
   
     // the other fingers change based on the same interpolation vector 
-    let intepolate = new BABYLON.Vector3((landmarks[19].x+landmarks[17].x)/2, 
-                                         (landmarks[19].y+landmarks[17].y)/2, 
-                                         (landmarks[19].z+landmarks[17].z)/2)
+    let intepolate = new BABYLON.Vector3((landmarks[19].x+landmarks[21].x)/2, 
+                                         (landmarks[19].y+landmarks[21].y)/2, 
+                                         (landmarks[19].z+landmarks[21].z)/2)
     keypoint1 = new BABYLON.Vector3((intepolate.x-landmarks[15].x), 
                                     (intepolate.y-landmarks[15].y), 
                                     (intepolate.z-landmarks[15].z))
@@ -317,9 +317,9 @@ const transformRightHand = (landmarks) => {
     //44:'mixamorig:RightHandThumb4'
     
     // the other fingers change based on the same interpolation vector 
-    let intepolate = new BABYLON.Vector3((landmarks[20].x+landmarks[18].x)/2, 
-                                         (landmarks[20].y+landmarks[18].y)/2, 
-                                         (landmarks[20].z+landmarks[18].z)/2)
+    let intepolate = new BABYLON.Vector3((landmarks[20].x+landmarks[22].x)/2, 
+                                         (landmarks[20].y+landmarks[22].y)/2, 
+                                         (landmarks[20].z+landmarks[22].z)/2)
     keypoint1 = new BABYLON.Vector3((intepolate.x-landmarks[16].x), 
                                     (intepolate.y-landmarks[16].y), 
                                     (intepolate.z-landmarks[16].z))
@@ -371,13 +371,13 @@ const transformRightLeg = (landmarks) => {
     keypoint1 = new BABYLON.Vector3(landmarks[28].x-landmarks[26].x, 
                                     landmarks[28].y-landmarks[26].y, 
                                     landmarks[28].z-landmarks[26].z)
-    modelBones[58] = keypoint1  
+    //modelBones[58] = keypoint1  
 
     //59:'mixamorig:RightFoot'
     keypoint1 = new BABYLON.Vector3(landmarks[32].x-landmarks[28].x, 
                                     landmarks[32].y-landmarks[28].y, 
                                     landmarks[32].z-landmarks[28].z)
-    modelBones[59] = keypoint1  
+    //modelBones[59] = keypoint1  
 
     //60:'mixamorig:RightToeBase'
     keypoint1 = new BABYLON.Vector3(landmarks[30].x-landmarks[28].x, 
@@ -398,13 +398,13 @@ const transformLeftLeg = (landmarks) => {
     keypoint1 = new BABYLON.Vector3(landmarks[27].x-landmarks[25].x, 
                                     landmarks[27].y-landmarks[25].y, 
                                     landmarks[27].z-landmarks[25].z)
-    modelBones[63] = keypoint1  
+    //modelBones[63] = keypoint1  
 
     //64:'mixamorig:LeftFoot'
     keypoint1 = new BABYLON.Vector3(landmarks[31].x-landmarks[27].x, 
                                     landmarks[31].y-landmarks[27].y, 
                                     landmarks[31].z-landmarks[27].z)
-    modelBones[64] = keypoint1      
+    //modelBones[64] = keypoint1      
 
     //65:'mixamorig:LeftToeBase'
     keypoint1 = new BABYLON.Vector3(landmarks[29].x-landmarks[27].x, 

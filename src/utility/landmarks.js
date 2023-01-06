@@ -1,6 +1,8 @@
 import * as BABYLON from 'babylonjs'
 
 let g_scene = null
+let g_translateY = 0
+
 let vectorReps = []
 const s = 0.01
 const shape = [
@@ -47,12 +49,14 @@ const createExtrudeShape = function(poses, from, to, index) {
 
     unitVecRep.scaling = new BABYLON.Vector3(1, 1, 5)
     unitVecRep.material = material
-    unitVecRep.position.x += 0.8    // shift the visual human to the left, (3D model is on the right)
+    unitVecRep.position.x += g_translateY   // shift the wizard
     vectorReps.push(unitVecRep)
 }
 
-export const DrawLandmarks = function (scene, poses) {
+export const DrawLandmarkWizard = function (scene, poses, translateY=0) {
     g_scene = scene
+    g_translateY = translateY
+
     vectorReps.forEach(
         vRep => {
                 vRep.dispose()
