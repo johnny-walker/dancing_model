@@ -47,7 +47,7 @@ const createExtrudeShape = function(poses, from, to, index) {
 
     unitVecRep.scaling = new BABYLON.Vector3(1, 1, 5)
     unitVecRep.material = material
-    unitVecRep.position.x += 0.8    // shift the whole visual to left, (3D model is on the right)
+    unitVecRep.position.x += 0.8    // shift the visual human to the left, (3D model is on the right)
     vectorReps.push(unitVecRep)
 }
 

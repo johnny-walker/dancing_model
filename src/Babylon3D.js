@@ -54,7 +54,7 @@ export default function Babylon3D(props) {
                 g_helper.setMainColor(BABYLON.Color3.Gray())
                 g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 0.8, 4))
  
-                // shift the whole model to the right, (visual human poses is on the left)
+                // shift the whole model to the right, (visual human is on the left)
                  g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)  
  
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer

@@ -20,7 +20,7 @@ export const TransformLandmarks = (landmarks) => {
         //BlazePose y-axis direction (down is positive) is inverse with Babylon 
         alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
         //3d model's hip location is 1 meter height
-        //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
+        //align and scale video skeleton's hip, (detected height depends on the distance from camera) 
         let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
         let hip_to_head = ( (landmarks[23].y-landmarks[1].y) + (landmarks[23].y-landmarks[1].y) ) / 2  
         if (height_of_hip !== undefined && hip_to_head !== undefined) {
@@ -60,8 +60,8 @@ export const TransformLandmarks = (landmarks) => {
     //transformLeftLeg(blazePoses)
 }
 
-export const RotateSpinBody = (bones) => {
-    rotateBones(bones)
+export const RotateSpinBody = (bones, mesh) => {
+    rotateBones(bones, mesh)
     spinBody(bones)
 }
 
@@ -95,43 +95,36 @@ export const GetBlazePoses = () => {
     return blazePoses
 }
 
-const rotateBones = (bones) => {
-    const globalRotation = (bone, vector) => {
-        let currentBone = bone
-        let V = vector
-        let index = 0
-    
-        while ( currentBone.getParent() !== null) {
-            if (currentBone.name === 'mixamorig:Spine2' ||
-                currentBone.name === 'mixamorig:Hips')
-                break
-            currentBone = currentBone.getParent()
-            let invMatrix = currentBone.getRotationMatrix()//.invert()
-            console.log(invMatrix)
-            console.log(`${index}: ${currentBone.name}`)
-            index += 1
-            V = BABYLON.Vector3.TransformCoordinates(V, invMatrix)
+const rotateBones = (bones, mesh) => {
+    // World Space direction
+    const getBoneDirection = (bones, i, mesh) => {
+        let UV = null
+        let V = bones[i].getPosition(BABYLON.Space.WORLD, mesh)
+        let parent = bones[i].getParent()
+        if (parent !== null) {
+            let U = parent.getPosition(BABYLON.Space.WORLD, mesh)
+            //let matrix = parent.getRotationMatrix()
+            //U = BABYLON.Vector3.TransformCoordinates(U, matrix)
+            UV = new BABYLON.Vector3(V.x-U.x, V.y-U.y, V.z-U.z)
+        } else {
+            UV = V
         }
-        return V
+        return UV
     }
 
     let matrix = new BABYLON.Matrix.Identity()
     for (let i=0; i< bones.length; i++) {
+        //console.log(`${i}: ${bones[i].name}`)
         let V = GetLandmarkDirection(i)
         if (V !== null) {
-            let U = bones[i].getPosition()
-            //U = globalRotation(bones[i], U) //global space to local space
-            if (i === 57 || i === 62){  // hip-leg bones
+            let U = getBoneDirection(bones, i, mesh)
+            if (i === 57 || i === 62){  
+                // 3D model's hip-leg bones are 45 degree, should align with y-axis
                 U = new BABYLON.Vector3(0, 1, 0)
                 matrix = GetAlignmentMatrix(U, V)
             } else {
                 matrix = GetAlignmentMatrix(U, V)
             }
-            //let orgMatrix = bones[i].getRotationMatrix()
-            //console.log(`${i}: ${bones[i].name}`)
-            //console.log(orgMatrix)
-            //let matrix2 = new BABYLON.Matrix.Identity()
-            //matrix2 = matrix.multiply(orgMatrix)    
             bones[i].setRotationMatrix(matrix) 
         }
     }    
@@ -238,33 +231,59 @@ const transformLeftHand = (landmarks) => {
     modelBones[11] = keypoint1   
 
     //12:'mixamorig:LeftHand'
-    keypoint1 = new BABYLON.Vector3(landmarks[19].x-landmarks[15].x, 
-                                    landmarks[19].y-landmarks[15].y, 
-                                    landmarks[19].z-landmarks[15].z)
-    //modelBones[12] = keypoint1    
+    keypoint1 = new BABYLON.Vector3((landmarks[19].x-landmarks[15].x), 
+                                    (landmarks[19].y-landmarks[15].y), 
+                                    (landmarks[19].z-landmarks[15].z))
+    modelBones[12] = keypoint1    
 
-    /*
-    13:'mixamorig:LeftHandMiddle1',
-    14:'mixamorig:LeftHandMiddle2',
-    15:'mixamorig:LeftHandMiddle3',
-    16:'mixamorig:LeftHandMiddle4',
-    17:'mixamorig:LeftHandThumb1',
-    18:'mixamorig:LeftHandThumb2',
-    19:'mixamorig:LeftHandThumb3',
-    20:'mixamorig:LeftHandThumb4',
-    21:'mixamorig:LeftHandIndex1',
-    22:'mixamorig:LeftHandIndex2',
-    23:'mixamorig:LeftHandIndex3',
-    24:'mixamorig:LeftHandIndex4',
-    25:'mixamorig:LeftHandRing1',
-    26:'mixamorig:LeftHandRing2',
-    27:'mixamorig:LeftHandRing3',
-    28:'mixamorig:LeftHandRing4',
-    29:'mixamorig:LeftHandPinky1',
-    30:'mixamorig:LeftHandPinky2',
-    31:'mixamorig:LeftHandPinky3',
-    32:'mixamorig:LeftHandPinky4',
-    */
+    // Thumb keeps original direction
+    //17:'mixamorig:LeftHandThumb1'
+    //18:'mixamorig:LeftHandThumb2'
+    //19:'mixamorig:LeftHandThumb3'
+    //20:'mixamorig:LeftHandThumb4'
+  
+    // the other fingers change based on the same interpolation vector 
+    let intepolate = new BABYLON.Vector3((landmarks[19].x+landmarks[17].x)/2, 
+                                         (landmarks[19].y+landmarks[17].y)/2, 
+                                         (landmarks[19].z+landmarks[17].z)/2)
+    keypoint1 = new BABYLON.Vector3((intepolate.x-landmarks[15].x), 
+                                    (intepolate.y-landmarks[15].y), 
+                                    (intepolate.z-landmarks[15].z))
+    //13:'mixamorig:LeftHandMiddle1'
+    //14:'mixamorig:LeftHandMiddle2'
+    //15:'mixamorig:LeftHandMiddle3'
+    //16:'mixamorig:LeftHandMiddle4'
+    modelBones[13] = keypoint1    
+    //modelBones[14] = keypoint1    
+    //modelBones[15] = keypoint1    
+    //modelBones[16] = keypoint1    
+
+    //21:'mixamorig:LeftHandIndex1'
+    //22:'mixamorig:LeftHandIndex2'
+    //23:'mixamorig:LeftHandIndex3'
+    //24:'mixamorig:LeftHandIndex4'
+    modelBones[21] = keypoint1    
+    //modelBones[22] = keypoint1  
+    //modelBones[23] = keypoint1  
+    //modelBones[24] = keypoint1  
+
+    //25:'mixamorig:LeftHandRing1'
+    //26:'mixamorig:LeftHandRing2'
+    //27:'mixamorig:LeftHandRing3'
+    //28:'mixamorig:LeftHandRing4'
+    modelBones[25] = keypoint1    
+    //modelBones[26] = keypoint1    
+    //modelBones[27] = keypoint1    
+    //modelBones[28] = keypoint1    
+
+    //29:'mixamorig:LeftHandPinky1'
+    //30:'mixamorig:LeftHandPinky2'
+    //31:'mixamorig:LeftHandPinky3'
+    //32:'mixamorig:LeftHandPinky4'
+    modelBones[29] = keypoint1    
+    //modelBones[30] = keypoint1    
+    //modelBones[31] = keypoint1    
+    //modelBones[32] = keypoint1    
 }
 
 const transformRightHand = (landmarks) => {
@@ -289,30 +308,56 @@ const transformRightHand = (landmarks) => {
     keypoint1 = new BABYLON.Vector3(landmarks[20].x-landmarks[16].x, 
                                     landmarks[20].y-landmarks[16].y, 
                                     landmarks[20].z-landmarks[16].z)
-    //modelBones[36] = keypoint1  
+    modelBones[36] = keypoint1  
 
-    /*
-    37:'mixamorig:RightHandMiddle1',
-    38:'mixamorig:RightHandMiddle2',
-    39:'mixamorig:RightHandMiddle3',
-    40:'mixamorig:RightHandMiddle4',
-    41:'mixamorig:RightHandThumb1',
-    42:'mixamorig:RightHandThumb2',
-    43:'mixamorig:RightHandThumb3',
-    44:'mixamorig:RightHandThumb4',
-    45:'mixamorig:RightHandIndex1',
-    46:'mixamorig:RightHandIndex2',
-    47:'mixamorig:RightHandIndex3',
-    48:'mixamorig:RightHandIndex4',
-    49:'mixamorig:RightHandRing1',
-    50:'mixamorig:RightHandRing2',
-    51:'mixamorig:RightHandRing3',
-    52:'mixamorig:RightHandRing4',
-    53:'mixamorig:RightHandPinky1',
-    54:'mixamorig:RightHandPinky2',
-    55:'mixamorig:RightHandPinky3',
-    56:'mixamorig:RightHandPinky4',
-    */
+    // Thumb keeps original direction
+    //41:'mixamorig:RightHandThumb1'
+    //42:'mixamorig:RightHandThumb2'
+    //43:'mixamorig:RightHandThumb3'
+    //44:'mixamorig:RightHandThumb4'
+    
+    // the other fingers change based on the same interpolation vector 
+    let intepolate = new BABYLON.Vector3((landmarks[20].x+landmarks[18].x)/2, 
+                                         (landmarks[20].y+landmarks[18].y)/2, 
+                                         (landmarks[20].z+landmarks[18].z)/2)
+    keypoint1 = new BABYLON.Vector3((intepolate.x-landmarks[16].x), 
+                                    (intepolate.y-landmarks[16].y), 
+                                    (intepolate.z-landmarks[16].z))
+    //37:'mixamorig:RightHandMiddle1'
+    //38:'mixamorig:RightHandMiddle2'
+    //39:'mixamorig:RightHandMiddle3'
+    //40:'mixamorig:RightHandMiddle4'
+    modelBones[37] = keypoint1    
+    //modelBones[38] = keypoint1    
+    //modelBones[39] = keypoint1    
+    //modelBones[40] = keypoint1   
+
+    //45:'mixamorig:RightHandIndex1'
+    //46:'mixamorig:RightHandIndex2'
+    //47:'mixamorig:RightHandIndex3'
+    //48:'mixamorig:RightHandIndex4'
+    modelBones[45] = keypoint1    
+    //modelBones[46] = keypoint1    
+    //modelBones[47] = keypoint1    
+    //modelBones[48] = keypoint1  
+
+    //49:'mixamorig:RightHandRing1'
+    //50:'mixamorig:RightHandRing2'
+    //51:'mixamorig:RightHandRing3'
+    //52:'mixamorig:RightHandRing4'
+    modelBones[49] = keypoint1    
+    //modelBones[50] = keypoint1    
+    //modelBones[51] = keypoint1    
+    //modelBones[52] = keypoint1 
+
+    //53:'mixamorig:RightHandPinky1'
+    //54:'mixamorig:RightHandPinky2'
+    //55:'mixamorig:RightHandPinky3'
+    //56:'mixamorig:RightHandPinky4'
+    modelBones[53] = keypoint1    
+    //modelBones[54] = keypoint1    
+    //modelBones[55] = keypoint1    
+    //modelBones[56] = keypoint1     
 }
 
 const transformRightLeg = (landmarks) => {
