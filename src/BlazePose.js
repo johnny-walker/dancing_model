@@ -71,16 +71,19 @@ function BlazePose(props) {
         //window.requestAnimationFrame(estimatePose)
     }
 
-    const onClickVideo = () => {
+    const onClick = () => {
         resumePlayback = !resumePlayback 
+    }
+    const onDoubleClick = () => {
+        slowMotion = !slowMotion 
     }
 
 
     useEffect(() => {
         console.log('BlazePose mounted')
-
         const video = document.getElementById('dance_video')
-        video.addEventListener('click', onClickVideo, true) 
+        video.addEventListener('click', onClick, true) 
+        video.addEventListener('dblclick', onDoubleClick, true) 
 
         // Load the 3D engine
         if (!detectorInvoked) {

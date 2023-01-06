@@ -52,21 +52,18 @@ export default function Babylon3D(props) {
                 light.intensity = 1.0
                 g_helper = g_scene.createDefaultEnvironment()
                 g_helper.setMainColor(BABYLON.Color3.Gray())
-
-                let bones = g_skeleton.bones
-
-                //console.log(g_scene.cameras[0])
                 g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 0.8, 4))
-                g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)
  
-                //console.log(g_skeleton.bones)
-                CreateRotationAgent(g_scene)
+                // shift the whole model to the right, (visual human poses is on the left)
+                 g_mesh.position =  new BABYLON.Vector3(-0.8, 0, 0)  
+ 
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
                 DebugScene(g_scene, g_mesh, g_skeleton, false, false, false, false)
+                CreateRotationAgent(g_scene)
                             
                 g_scene.beforeRender = function () {
                     if (g_center !== null) {
-                        RotateSpinBody(bones)
+                        RotateSpinBody(g_skeleton.bones)
                         let poses = GetBlazePoses()
                         DrawLandmarks(g_scene, poses)
                     }

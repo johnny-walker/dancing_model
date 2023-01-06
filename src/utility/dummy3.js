@@ -17,7 +17,7 @@ export const TransformLandmarks = (landmarks) => {
     //3d model's 3D origin(center) is at hip
     //detected video skeleton should align with 3D model's center, as well as aling the scale of the body
     const initLandmarkAlginment = (landmarks) => {
-        //video y-axis positive direction is down (upside down with 3d model's y-axis) 
+        //BlazePose y-axis direction (down is positive) is inverse with Babylon 
         alignMatrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
         //3d model's hip location is 1 meter height
         //align and scale video skeleton's hip, (as detected height depends on the distance from camera) 
@@ -47,7 +47,8 @@ export const TransformLandmarks = (landmarks) => {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
         //let fScaling = i<20 ? scaling : scalingUp
         landmark = BABYLON.Vector3.TransformCoordinates(landmark, alignMatrix)//.scale(fScaling)
-        landmark.x = - landmark.x
+        // BlazePose x-axis direction is inverse with Babylon
+        landmark.x = - landmark.x   
         blazePoses.push(landmark)
     }
 
