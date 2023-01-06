@@ -6,8 +6,10 @@ import '@mediapipe/pose'
 
 let detectorInvoked = false
 let resumePlayback = false
+let slowMotion = true
 let warmedUp = false
 let timer = null
+let interval = 200
 
 let g_pose = null
 let g_funUpdateKeypoints = null
@@ -58,15 +60,14 @@ function BlazePose(props) {
 
         if (resumePlayback && poses[0] !== undefined) {
             g_pose = poses[0]
-            video.play()
-            //console.log(g_pose)
+            //video.play()  // let Babylon3D calls PlayVideo() after Model is renderred
         } 
 
         if ( g_funUpdateKeypoints && g_pose !== undefined ) {
             g_funUpdateKeypoints(g_pose.keypoints3D)
         }
 
-        timer = window.setInterval(estimatePose, 250)
+        timer = window.setInterval(estimatePose, interval)
         //window.requestAnimationFrame(estimatePose)
     }
 
@@ -110,4 +111,17 @@ function BlazePose(props) {
 export const SetCallback = (updateKeypoints) => {
     g_funUpdateKeypoints = updateKeypoints
 }
+
+export const PlayVideo = (state) => {
+    const video = document.getElementById('dance_video')
+    if (state === 'play' && resumePlayback) {
+        video.play()
+        if (slowMotion) {
+            video.pause()   //debugging purpuse, pause() immediately after play()
+        }
+    } else if (state === 'pause') {
+        video.pause()
+    }
+}
+
 export default BlazePose

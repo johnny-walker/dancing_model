@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
-import {SetCallback} from './BlazePose.js'
+import {SetCallback, PlayVideo} from './BlazePose.js'
 import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
@@ -71,12 +71,17 @@ export default function Babylon3D(props) {
                         DrawLandmarks(g_scene, poses)
                     }
                 }
+                g_scene.afterRender = function () {
+                    if(g_center !== null) {
+                        g_center = null
+                        PlayVideo('play')
+                    }
+                }
 
                 //render loop
                 g_engine.runRenderLoop(function(){
                     if (g_scene) { 
                         g_scene.render() 
-                        g_center = null
                     }
                 })
             }

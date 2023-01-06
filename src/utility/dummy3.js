@@ -40,7 +40,7 @@ export const TransformLandmarks = (landmarks) => {
         modelBones.push(null)
     }
 
-    //if (alignMatrix === null)
+    if (alignMatrix === null)
         initLandmarkAlginment(landmarks)
 
     for (let i=0; i<landmarks.length; i++ ) {
@@ -144,9 +144,9 @@ const spinBody = (bones) => {
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
-    angle = getBodySpinAngle(1)/2
+    angle = getBodySpinAngle(1)/4
     matrix = GetRotationMatrix(0, angle, 0)
-    //bones[0].setRotationMatrix(matrix) 
+    bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
 
 }
