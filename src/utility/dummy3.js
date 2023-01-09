@@ -11,6 +11,7 @@ let blazePoses = [] //store revised transformation results of the 33 landmarks
 let modelBones = [] //store detected direction of aligned 3D model's 67 bones
 
 export const TransformLandmarks = (landmarks) => {
+    console.log("in TransformLandmarks")
     //algin video's person with 3D model 
     //3d model's 3D origin(center) is at hip
     //detected video skeleton should align with 3D model's center, as well as aling the scale of the body
