@@ -20,7 +20,7 @@ const Item = styled(Paper)(({ theme }) => ({
 function AppHome() {
   let videoPath = 'dancing.mp4'
   return (
-    <div >
+    < >
       <Grid container spacing={2}>
         <Grid xs={3}>
           <Item>
@@ -40,7 +40,7 @@ function AppHome() {
           </Item>
         </Grid>
       </Grid>
-    </div>
+    </>
   )
 }
 

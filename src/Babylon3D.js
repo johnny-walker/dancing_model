@@ -34,7 +34,7 @@ export default function Babylon3D(props) {
             await g_engine.initAsync()
             if (g_engine) {
                 console.log('Babylon engine ready...')
-                timer = window.setInterval(createScene, 100)
+                timer = window.setInterval(createScene, 1000)
             }
         } else {
             console.log('Browser does not support WebGPU...')
