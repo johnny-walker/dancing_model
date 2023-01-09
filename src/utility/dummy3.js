@@ -7,7 +7,8 @@ let alignMatrix = null
 let NUMBER_OF_LANDMARKS = 33
 let NUMBER_OF_BONES = 67
 
-let blazePoses = [] //store revised transformation results of the 33 landmarks    
+let blazePoses = [] //store revised transformation results of the 33 landmarks   
+let poseScores = [] //store scores of the 33 landmarks    
 let modelBones = [] //store detected direction of aligned 3D model's 67 bones
 
 export const TransformLandmarks = (landmarks) => {
@@ -29,6 +30,7 @@ export const TransformLandmarks = (landmarks) => {
     }
     
     blazePoses = []
+    poseScores = []
     modelBones = []
 
     for (let i=0; i< NUMBER_OF_BONES; i++) {
@@ -44,6 +46,7 @@ export const TransformLandmarks = (landmarks) => {
         // BlazePose x-axis direction is inverse with Babylon
         landmark.x = - landmark.x   
         blazePoses.push(landmark)
+        poseScores.push(landmarks[i].score)
     }
 
     transformBody(blazePoses)
@@ -123,28 +126,38 @@ const rotateBones = (bones, mesh) => {
 }
 
 const spinBody = (bones) => {
-    // spin upper body
-    let angle = getBodySpinAngle(0)
+    // spin head
+    let angle = getSpinAngle('head')
     let matrix = GetRotationMatrix(0, angle, 0)
+    bones[5].setRotationMatrix(matrix) 
+
+    // spin shoulders
+    angle = getSpinAngle('shoulder')
+    matrix = GetRotationMatrix(0, angle, 0)
     bones[2].setRotationMatrix(matrix) 
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
-    angle = getBodySpinAngle(1)/4
+    angle = getSpinAngle('hip')/4
     matrix = GetRotationMatrix(0, angle, 0)
     bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
 
 }
 
-const getBodySpinAngle = (index) => {
+const getSpinAngle = (part) => {
     let direction = null
-    if ( index === 0 ) {
-        //should spin
+    if ( part === 'head' ) {
+        //head spin
+        direction = new BABYLON.Vector3(blazePoses[10].x-blazePoses[9].x, 
+                                        blazePoses[10].y-blazePoses[9].y, 
+                                        blazePoses[10].z-blazePoses[9].z)   
+    } else if ( part === 'shoulder' ) {
+        //shoulder spin
         direction = new BABYLON.Vector3(blazePoses[12].x-blazePoses[11].x, 
                                         blazePoses[12].y-blazePoses[11].y, 
                                         blazePoses[12].z-blazePoses[11].z)   
-    } else if ( index === 1 ) {
+    } else if ( part === 'hip' ) {
         //hip spin
         direction = new BABYLON.Vector3(blazePoses[24].x-blazePoses[23].x, 
                                         blazePoses[24].y-blazePoses[23].y, 
@@ -211,6 +224,7 @@ const transformHead = (landmarks) => {
     modelBones[8] = keypoint2                                    
 }
 
+const SCORE_THREASHOLD = 0.6
 const transformLeftHand = (landmarks) => {
     //9: 'mixamorig:LeftShoulder'
     let keypoint1 = new BABYLON.Vector3(landmarks[11].x-landmarks[12].x, 
@@ -243,6 +257,12 @@ const transformLeftHand = (landmarks) => {
     //20:'mixamorig:LeftHandThumb4'
   
     // the other fingers change based on the same interpolation vector 
+    if (poseScores[19] < SCORE_THREASHOLD || poseScores[21] < SCORE_THREASHOLD) { 
+        // finger score is not reliable
+        //console.log(`scores: ${poseScores[19]}, ${poseScores[21]}`)
+        return 
+    }
+
     let intepolate = new BABYLON.Vector3((landmarks[19].x+landmarks[21].x)/2, 
                                          (landmarks[19].y+landmarks[21].y)/2, 
                                          (landmarks[19].z+landmarks[21].z)/2)
@@ -317,6 +337,12 @@ const transformRightHand = (landmarks) => {
     //44:'mixamorig:RightHandThumb4'
     
     // the other fingers change based on the same interpolation vector 
+    if (poseScores[20] < SCORE_THREASHOLD || poseScores[22] < SCORE_THREASHOLD) { 
+        // finger score is not reliable
+        //console.log(`scores: ${poseScores[20]}, ${poseScores[22]}`)        
+        return 
+    }
+
     let intepolate = new BABYLON.Vector3((landmarks[20].x+landmarks[22].x)/2, 
                                          (landmarks[20].y+landmarks[22].y)/2, 
                                          (landmarks[20].z+landmarks[22].z)/2)
@@ -360,13 +386,14 @@ const transformRightHand = (landmarks) => {
     //modelBones[56] = keypoint1     
 }
 
+// only rotate RightUpLeg
 const transformRightLeg = (landmarks) => {
     //57:'mixamorig:RightUpLeg'
-    let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
-                                        landmarks[26].y-landmarks[24].y, 
-                                        landmarks[26].z-landmarks[24].z)
+    //let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
+    //                                    landmarks[26].y-landmarks[24].y, 
+    //                                    landmarks[26].z-landmarks[24].z)
     modelBones[57] = landmarks[24]  
-
+    /*    
     //58:'mixamorig:RightLeg'
     keypoint1 = new BABYLON.Vector3(landmarks[28].x-landmarks[26].x, 
                                     landmarks[28].y-landmarks[26].y, 
@@ -385,15 +412,17 @@ const transformRightLeg = (landmarks) => {
                                     landmarks[30].z-landmarks[28].z)
     //modelBones[60] = keypoint1  
     //61:'mixamorig:RightToe_End'
+    */
 }
 
+// only rotate LeftUpLeg
 const transformLeftLeg = (landmarks) => {
     //62:'mixamorig:LeftUpLeg'
-    let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
-                                        landmarks[25].y-landmarks[23].y, 
-                                        landmarks[25].z-landmarks[23].z)
+    //let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
+    //                                    landmarks[25].y-landmarks[23].y, 
+    //                                    landmarks[25].z-landmarks[23].z)
     modelBones[62] = landmarks[23]      
-
+    /*
     //63:'mixamorig:LeftLeg'
     keypoint1 = new BABYLON.Vector3(landmarks[27].x-landmarks[25].x, 
                                     landmarks[27].y-landmarks[25].y, 
@@ -412,6 +441,7 @@ const transformLeftLeg = (landmarks) => {
                                     landmarks[29].z-landmarks[27].z)
     //modelBones[65] = keypoint1  
     //66:'mixamorig:LeftToe_End'
+    */
 }
 
 /* bones info

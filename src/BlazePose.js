@@ -5,7 +5,7 @@ import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
 
 let detectorInvoked = false
-let resumePlayback = true
+let resumePlayback = false
 let slowMotion = false
 let warmedUp = false
 let timer = null
@@ -40,17 +40,17 @@ function BlazePose(props) {
 
     var estimatePose = async function() {
         //if (!warmedUp) 
-        {
+        //{
             //console.log('3D POSE warm up detecting...')
             clearTimeout(timer)
-        }
+        //}
 
         const video = document.getElementById('dance_video')
         video.pause()
 
         const timestamp = performance.now()
         let poses = await detector.estimatePoses(video)
-        console.log(performance.now() - timestamp)
+        //console.log(performance.now() - timestamp)
 
         if (!warmedUp) {
             g_pose = poses[0]
