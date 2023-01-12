@@ -11,7 +11,7 @@ let blazePoses = [] //store revised transformation results of the 33 landmarks
 let poseScores = [] //store scores of the 33 landmarks    
 let modelBones = [] //store detected direction of aligned 3D model's 67 bones
 
-export const TransformLandmarks = (landmarks) => {
+export const TransformLandmarks = (landmarks, rotateLegs) => {
     console.log("in TransformLandmarks")
     //algin video's person with 3D model 
     //3d model's 3D origin(center) is at hip
@@ -54,8 +54,8 @@ export const TransformLandmarks = (landmarks) => {
     transformHead(blazePoses)
     transformLeftHand(blazePoses)
     transformRightHand(blazePoses)
-    transformRightLeg(blazePoses)
-    transformLeftLeg(blazePoses)
+    transformRightLeg(blazePoses, rotateLegs)
+    transformLeftLeg(blazePoses, rotateLegs)
 }
 
 export const RotateSpinBody = (bones, mesh) => {
@@ -388,61 +388,68 @@ const transformRightHand = (landmarks) => {
 }
 
 // only rotate RightUpLeg
-const transformRightLeg = (landmarks) => {
-    //57:'mixamorig:RightUpLeg'
-    //let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
-    //                                    landmarks[26].y-landmarks[24].y, 
-    //                                    landmarks[26].z-landmarks[24].z)
-    modelBones[57] = landmarks[24]  
-    /*    
-    //58:'mixamorig:RightLeg'
-    keypoint1 = new BABYLON.Vector3(landmarks[28].x-landmarks[26].x, 
-                                    landmarks[28].y-landmarks[26].y, 
-                                    landmarks[28].z-landmarks[26].z)
-    //modelBones[58] = keypoint1  
+const transformRightLeg = (landmarks, rotateLegs=false) => {
+    if (!rotateLegs) {
+        //57:'mixamorig:RightUpLeg'
+        modelBones[57] = landmarks[24] 
+    } else {
+        let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
+                                            landmarks[26].y-landmarks[24].y, 
+                                            landmarks[26].z-landmarks[24].z)
+        //57:'mixamorig:RightUpLeg'
+        modelBones[57] = keypoint1 
+        
+        //58:'mixamorig:RightLeg'
+        keypoint1 = new BABYLON.Vector3(landmarks[28].x-landmarks[26].x, 
+                                        landmarks[28].y-landmarks[26].y, 
+                                        landmarks[28].z-landmarks[26].z)
+        modelBones[58] = keypoint1  
 
-    //59:'mixamorig:RightFoot'
-    keypoint1 = new BABYLON.Vector3(landmarks[32].x-landmarks[28].x, 
-                                    landmarks[32].y-landmarks[28].y, 
-                                    landmarks[32].z-landmarks[28].z)
-    //modelBones[59] = keypoint1  
+        //59:'mixamorig:RightFoot'
+        keypoint1 = new BABYLON.Vector3(landmarks[32].x-landmarks[28].x, 
+                                        landmarks[32].y-landmarks[28].y, 
+                                        landmarks[32].z-landmarks[28].z)
+        modelBones[59] = keypoint1  
 
-    //60:'mixamorig:RightToeBase'
-    keypoint1 = new BABYLON.Vector3(landmarks[30].x-landmarks[28].x, 
-                                    landmarks[30].y-landmarks[28].y, 
-                                    landmarks[30].z-landmarks[28].z)
-    //modelBones[60] = keypoint1  
-    //61:'mixamorig:RightToe_End'
-    */
+        //60:'mixamorig:RightToeBase'
+        keypoint1 = new BABYLON.Vector3(landmarks[30].x-landmarks[28].x, 
+                                        landmarks[30].y-landmarks[28].y, 
+                                        landmarks[30].z-landmarks[28].z)
+        modelBones[60] = keypoint1  
+        //61:'mixamorig:RightToe_End'
+    }
 }
 
 // only rotate LeftUpLeg
-const transformLeftLeg = (landmarks) => {
-    //62:'mixamorig:LeftUpLeg'
-    //let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
-    //                                    landmarks[25].y-landmarks[23].y, 
-    //                                    landmarks[25].z-landmarks[23].z)
-    modelBones[62] = landmarks[23]      
-    /*
-    //63:'mixamorig:LeftLeg'
-    keypoint1 = new BABYLON.Vector3(landmarks[27].x-landmarks[25].x, 
-                                    landmarks[27].y-landmarks[25].y, 
-                                    landmarks[27].z-landmarks[25].z)
-    //modelBones[63] = keypoint1  
+const transformLeftLeg = (landmarks, rotateLegs=false) => {
+    if (!rotateLegs) {
+        //62:'mixamorig:LeftUpLeg'
+        modelBones[62] = landmarks[23]    
+    } else {
+        let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
+                                            landmarks[25].y-landmarks[23].y, 
+                                            landmarks[25].z-landmarks[23].z)
+        //62:'mixamorig:LeftUpLeg'
+        modelBones[62] = keypoint1      
+        //63:'mixamorig:LeftLeg'
+        keypoint1 = new BABYLON.Vector3(landmarks[27].x-landmarks[25].x, 
+                                        landmarks[27].y-landmarks[25].y, 
+                                        landmarks[27].z-landmarks[25].z)
+        modelBones[63] = keypoint1  
 
-    //64:'mixamorig:LeftFoot'
-    keypoint1 = new BABYLON.Vector3(landmarks[31].x-landmarks[27].x, 
-                                    landmarks[31].y-landmarks[27].y, 
-                                    landmarks[31].z-landmarks[27].z)
-    //modelBones[64] = keypoint1      
+        //64:'mixamorig:LeftFoot'
+        keypoint1 = new BABYLON.Vector3(landmarks[31].x-landmarks[27].x, 
+                                        landmarks[31].y-landmarks[27].y, 
+                                        landmarks[31].z-landmarks[27].z)
+        modelBones[64] = keypoint1      
 
-    //65:'mixamorig:LeftToeBase'
-    keypoint1 = new BABYLON.Vector3(landmarks[29].x-landmarks[27].x, 
-                                    landmarks[29].y-landmarks[27].y, 
-                                    landmarks[29].z-landmarks[27].z)
-    //modelBones[65] = keypoint1  
-    //66:'mixamorig:LeftToe_End'
-    */
+        //65:'mixamorig:LeftToeBase'
+        keypoint1 = new BABYLON.Vector3(landmarks[29].x-landmarks[27].x, 
+                                        landmarks[29].y-landmarks[27].y, 
+                                        landmarks[29].z-landmarks[27].z)
+        modelBones[65] = keypoint1  
+        //66:'mixamorig:LeftToe_End'
+    }
 }
 
 /* bones info

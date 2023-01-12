@@ -116,6 +116,7 @@ export default function Babylon3D(props) {
     }) 
 
     // callback function
+    let rotateLegs = false
     const updateKeypoints = (bones) => {
         if (bones === undefined || bones.length !== 33) {
             // BlazePose detecting result should contain 33 landmarks
@@ -123,7 +124,7 @@ export default function Babylon3D(props) {
             return
         }
         // convert BlazePose's landmarks space to Babylon World Space
-        TransformLandmarks(bones)
+        TransformLandmarks(bones, rotateLegs)
         g_center = GetPoseCenter()
     }
 
