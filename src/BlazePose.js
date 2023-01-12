@@ -95,6 +95,7 @@ function BlazePose(props) {
         return () => {
             console.log('BlazePose unmounted')
             video.addEventListener("click", null, true)
+            detector = null
         }
     }) 
 

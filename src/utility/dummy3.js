@@ -225,7 +225,7 @@ const transformHead = (landmarks) => {
     modelBones[8] = keypoint2                                    
 }
 
-const SCORE_THREASHOLD = 0.6
+const SCORE_THRESHOLD = 0.6
 const transformLeftHand = (landmarks) => {
     //9: 'mixamorig:LeftShoulder'
     let keypoint1 = new BABYLON.Vector3(landmarks[11].x-landmarks[12].x, 
@@ -258,7 +258,7 @@ const transformLeftHand = (landmarks) => {
     //20:'mixamorig:LeftHandThumb4'
   
     // the other fingers change based on the same interpolation vector 
-    if (poseScores[19] < SCORE_THREASHOLD || poseScores[21] < SCORE_THREASHOLD) { 
+    if (poseScores[19] < SCORE_THRESHOLD || poseScores[21] < SCORE_THRESHOLD) { 
         // finger score is not reliable
         //console.log(`scores: ${poseScores[19]}, ${poseScores[21]}`)
         return 
@@ -338,7 +338,7 @@ const transformRightHand = (landmarks) => {
     //44:'mixamorig:RightHandThumb4'
     
     // the other fingers change based on the same interpolation vector 
-    if (poseScores[20] < SCORE_THREASHOLD || poseScores[22] < SCORE_THREASHOLD) { 
+    if (poseScores[20] < SCORE_THRESHOLD || poseScores[22] < SCORE_THRESHOLD) { 
         // finger score is not reliable
         //console.log(`scores: ${poseScores[20]}, ${poseScores[22]}`)        
         return 
