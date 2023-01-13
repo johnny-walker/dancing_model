@@ -42,7 +42,7 @@ export const  DebugScene = function (scene, mesh, skeleton, showSphere=true, sho
     }
 
     if (showAxis) {
-        new BABYLON.AxesViewer(scene, 0.25)
+        new BABYLON.AxesViewer(scene, 0.2)
     }
 
     if (showLayer) {

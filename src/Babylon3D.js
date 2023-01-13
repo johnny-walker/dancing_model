@@ -52,14 +52,15 @@ export default function Babylon3D(props) {
                 light.intensity = 1.0
                 g_helper = g_scene.createDefaultEnvironment()
                 g_helper.setMainColor(BABYLON.Color3.Gray())
-                g_scene.cameras[0].setPosition(new BABYLON.Vector3(0, 0.8, 4))
- 
+
+                const POSITION_SHIFT = 0.8
+                g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
                 let drawWizard = true
-                let translateY = drawWizard ? 0.8 : 0.0
+                let translateY = drawWizard ? POSITION_SHIFT : 0.0
                 g_mesh.position =  new BABYLON.Vector3(-translateY, 0, 0)  // shift the model
  
                 //scene, mesh, skeleton, showSphere, showViewer, showAxis, showLayer
-                DebugScene(g_scene, g_mesh, g_skeleton, false, false, false, false)
+                DebugScene(g_scene, g_mesh, g_skeleton, false, false, true, false)
                 CreateRotationAgent(g_scene)
                             
                 g_scene.beforeRender = function () {
