@@ -114,9 +114,9 @@ const rotateBones = (bones, mesh) => {
         let V = GetLandmarkDirection(i)
         if (V !== null) {
             let U = getBoneDirection(bones, i, mesh)
-            if (i === 57 || i === 62){  
+            if (i === 57 || i === 62) {  
                 // 3D model's hip-leg bones are 45 degree, should align with y-axis
-                U = new BABYLON.Vector3(0, 1, 0)
+                U = new BABYLON.Vector3(0, -1, 0)
                 matrix = GetAlignmentMatrix(U, V)
             } else {
                 matrix = GetAlignmentMatrix(U, V)
@@ -390,21 +390,24 @@ const transformRightHand = (landmarks) => {
 // only rotate RightUpLeg
 const transformRightLeg = (landmarks, rotateLegs=false) => {
     if (!rotateLegs) {
+        return
         //57:'mixamorig:RightUpLeg'
-        modelBones[57] = landmarks[24] 
+        modelBones[57] = new BABYLON.Vector3( landmarks[24].x,
+                                             -landmarks[24].y,
+                                              0) 
     } else {
         let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
                                             landmarks[26].y-landmarks[24].y, 
-                                            landmarks[26].z-landmarks[24].z)
+                                            0)
         //57:'mixamorig:RightUpLeg'
         modelBones[57] = keypoint1 
-        
+
         //58:'mixamorig:RightLeg'
         keypoint1 = new BABYLON.Vector3(landmarks[28].x-landmarks[26].x, 
                                         landmarks[28].y-landmarks[26].y, 
-                                        landmarks[28].z-landmarks[26].z)
+                                        0)
         modelBones[58] = keypoint1  
-
+        return
         //59:'mixamorig:RightFoot'
         keypoint1 = new BABYLON.Vector3(landmarks[32].x-landmarks[28].x, 
                                         landmarks[32].y-landmarks[28].y, 
@@ -423,20 +426,24 @@ const transformRightLeg = (landmarks, rotateLegs=false) => {
 // only rotate LeftUpLeg
 const transformLeftLeg = (landmarks, rotateLegs=false) => {
     if (!rotateLegs) {
+        return
         //62:'mixamorig:LeftUpLeg'
-        modelBones[62] = landmarks[23]    
+        modelBones[62] = new BABYLON.Vector3( landmarks[23].x,
+                                             -landmarks[23].y,
+                                              0) 
     } else {
         let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
                                             landmarks[25].y-landmarks[23].y, 
-                                            landmarks[25].z-landmarks[23].z)
+                                            0)
         //62:'mixamorig:LeftUpLeg'
         modelBones[62] = keypoint1      
+
         //63:'mixamorig:LeftLeg'
         keypoint1 = new BABYLON.Vector3(landmarks[27].x-landmarks[25].x, 
                                         landmarks[27].y-landmarks[25].y, 
-                                        landmarks[27].z-landmarks[25].z)
+                                        0)
         modelBones[63] = keypoint1  
-
+        return
         //64:'mixamorig:LeftFoot'
         keypoint1 = new BABYLON.Vector3(landmarks[31].x-landmarks[27].x, 
                                         landmarks[31].y-landmarks[27].y, 

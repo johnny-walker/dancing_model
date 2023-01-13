@@ -59,7 +59,7 @@ export const DrawLandmarkWizard = function (scene, poses, translateY=0) {
 
     vectorReps.forEach(
         vRep => {
-                vRep.dispose()
+            vRep.dispose()
         }
     )
     vectorReps = []
