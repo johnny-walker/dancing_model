@@ -41,18 +41,19 @@ export default function Babylon3D(props) {
         }
     }
 
-    var loadScene = function (path, model) {
+    var loadDummy3 = function (path, model) {
     
         BABYLON.SceneLoader.ImportMesh("", path, model, g_scene,
             function (meshes, particleSystems, skeletons) {          
                 g_skeleton = skeletons[0]
                 g_mesh = meshes[0]
+                
                 g_scene.createDefaultCameraOrLight(true, true, true)
                 let light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
                 light.intensity = 1.0
                 g_helper = g_scene.createDefaultEnvironment()
                 g_helper.setMainColor(BABYLON.Color3.Gray())
-
+                
                 const POSITION_SHIFT = 0.8
                 g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
                 let drawWizard = true
@@ -90,6 +91,34 @@ export default function Babylon3D(props) {
         )
     }
 
+    var loadRobot = function(path, model){
+        // Append glTF model to scene.
+        BABYLON.SceneLoader.ImportMesh("", "./scenes/", "RobotExpressive.glb", g_scene,
+        function (meshes, particleSystems, skeletons) { 
+            g_skeleton = skeletons[0]
+            g_mesh = meshes[0]
+            console.log(g_skeleton)
+
+            g_scene.createDefaultCameraOrLight(true, true, true)
+            let light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
+            light.intensity = 1.0
+            g_helper = g_scene.createDefaultEnvironment()
+            g_helper.setMainColor(BABYLON.Color3.Gray())
+
+            const POSITION_SHIFT = 0.8
+            g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
+
+            DebugScene(g_scene, g_mesh, g_skeleton, false, true, true, false)
+            //render loop
+            g_engine.runRenderLoop(function(){
+                if (g_scene) { 
+                    g_scene.render() 
+                }
+            })
+        })
+    }
+
+    let avata = 'robot'
     var createScene = function(){
         if (timer) 
             clearTimeout(timer)
@@ -97,9 +126,19 @@ export default function Babylon3D(props) {
             return
 
         g_scene = new BABYLON.Scene(g_engine)
-        let path = "./scenes/dummy3/"
-        let model = "dummy3.babylon"
-        loadScene(path, model)
+        
+        let path = null
+        let model = null
+
+        if (avata === 'dummy3') {
+            path = "./scenes/dummy3/"
+            model = "dummy3.babylon"
+            loadDummy3("./scenes/dummy3/", "dummy3.babylon")
+        } else if (avata === 'robot') {
+            path = "./scenes/" 
+            model = "RobotExpressive.glb"
+            loadRobot(path, model)
+        }
     }
 
     // constructor, destructor
