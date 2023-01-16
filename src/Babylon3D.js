@@ -118,7 +118,7 @@ export default function Babylon3D(props) {
         })
     }
 
-    let avata = 'robot'
+    let avata = 'dummy3'
     var createScene = function(){
         if (timer) 
             clearTimeout(timer)
