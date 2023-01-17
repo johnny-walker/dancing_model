@@ -2,10 +2,12 @@ import React, { useEffect } from 'react'
 import * as BABYLON from 'babylonjs'
 import 'babylonjs-inspector'
 import {SetCallback, PlayVideo} from './BlazePose.js'
-import {TransformLandmarks, RotateSpinBody, GetPoseCenter, GetBlazePoses} from './utility/dummy3.js'
 import {CreateRotationAgent} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
 import {DrawLandmarkWizard} from './utility/landmarks.js'
+
+import {Transform2Dummy3, RotateSpinDummy3, GetDummy3Center, GetDummy3Poses} from './utility/dummy3.js'
+import {Transform2Robot} from './utility/robot.js'
 
 
 let g_engine = null
@@ -13,12 +15,14 @@ let g_scene = null
 let g_skeleton = null
 let g_mesh = null
 let g_helper = null
-let g_center = null
+let g_notifyDetection = false
+
 
 export default function Babylon3D(props) {
     let width = props.width
     let height = props.height
     let timer = null
+    let AVATA = 'dummy3'    // dummy3, robot
     
     var handleResize = function(){
         if (g_engine) {
@@ -65,9 +69,9 @@ export default function Babylon3D(props) {
                 CreateRotationAgent(g_scene)
                             
                 g_scene.beforeRender = function () {
-                    if (g_center !== null) {
-                        RotateSpinBody(g_skeleton.bones)
-                        let poses = GetBlazePoses()
+                    if (g_notifyDetection) {
+                        RotateSpinDummy3(g_skeleton.bones)
+                        let poses = GetDummy3Poses()
                         if (drawWizard) {
                             // shift the wizard (opposite to model) 
                             DrawLandmarkWizard(g_scene, poses, translateY)  
@@ -75,8 +79,8 @@ export default function Babylon3D(props) {
                     }
                 }
                 g_scene.afterRender = function () {
-                    if(g_center !== null) {
-                        g_center = null
+                    if(g_notifyDetection) {
+                        g_notifyDetection = false
                         PlayVideo('play')
                     }
                 }
@@ -96,8 +100,9 @@ export default function Babylon3D(props) {
         BABYLON.SceneLoader.ImportMesh("", "./scenes/", "RobotExpressive.glb", g_scene,
         function (meshes, particleSystems, skeletons) { 
             g_skeleton = skeletons[0]
+            //console.log(g_skeleton)
             g_mesh = meshes[0]
-            console.log(g_skeleton)
+            g_mesh.scaling.x = g_mesh.scaling.y = g_mesh.scaling.z = 0.25
 
             g_scene.createDefaultCameraOrLight(true, true, true)
             let light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)
@@ -106,9 +111,13 @@ export default function Babylon3D(props) {
             g_helper.setMainColor(BABYLON.Color3.Gray())
 
             const POSITION_SHIFT = 0.8
-            g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
+            g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, -4))
+            let drawWizard = true
+            let translateY = drawWizard ? POSITION_SHIFT : 0.0
+            g_mesh.position =  new BABYLON.Vector3(translateY, 0, 0)  // shift the model
 
             DebugScene(g_scene, g_mesh, g_skeleton, false, true, true, false)
+
             //render loop
             g_engine.runRenderLoop(function(){
                 if (g_scene) { 
@@ -118,7 +127,7 @@ export default function Babylon3D(props) {
         })
     }
 
-    let avata = 'dummy3'
+
     var createScene = function(){
         if (timer) 
             clearTimeout(timer)
@@ -130,11 +139,11 @@ export default function Babylon3D(props) {
         let path = null
         let model = null
 
-        if (avata === 'dummy3') {
+        if (AVATA === 'dummy3') {
             path = "./scenes/dummy3/"
             model = "dummy3.babylon"
             loadDummy3("./scenes/dummy3/", "dummy3.babylon")
-        } else if (avata === 'robot') {
+        } else if (AVATA === 'robot') {
             path = "./scenes/" 
             model = "RobotExpressive.glb"
             loadRobot(path, model)
@@ -164,8 +173,12 @@ export default function Babylon3D(props) {
             return
         }
         // convert BlazePose's landmarks space to Babylon World Space
-        TransformLandmarks(bones, rotateLegs)
-        g_center = GetPoseCenter()
+        if (AVATA === 'dummy3') {
+            Transform2Dummy3(bones, rotateLegs)
+        } else if (AVATA === 'robot'){
+            Transform2Robot(bones, rotateLegs)
+        }
+        g_notifyDetection = true
     }
 
     return (

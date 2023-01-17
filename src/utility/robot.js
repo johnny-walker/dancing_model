@@ -3,20 +3,21 @@ import * as BABYLON from 'babylonjs'
 import {GetAlignmentMatrix, GetRotationMatrix} from './rotation.js'
 
 let NUMBER_OF_LANDMARKS = 33
-let NUMBER_OF_BONES = 67
+let NUMBER_OF_BONES = 43
 
 let blazePoses = [] //store revised transformation results of the 33 landmarks   
 let poseScores = [] //store scores of the 33 landmarks    
-let modelBones = [] //store detected direction of aligned 3D model's 67 bones
+let modelBones = [] //store detected direction of aligned 3D model's 43 bones
 let alignMatrix = null
 
-export const Transform2Dummy3 = (landmarks, rotateLegs) => {
+export const Transform2Robot = (landmarks, rotateLegs) => {
+    //console.log("Transform Landmarks to align with Robot ")    
     //algin video's person with 3D model 
     //BlazePose detected video skeleton center (0,0,0) is at hip
     const landmarkAlignment = (landmarks) => {
         //BlazePose y-axis direction (down is positive) is inverse with Babylon 
         let matrix = BABYLON.Matrix.RotationAxis(new BABYLON.Vector3(1, 0, 0),  Math.PI)
-        //dummy3's hip location is 1 meter height
+        //robot's hip location is 1 meter height
         //align skeleton's hip
         let height_of_hip = ( (landmarks[29].y-landmarks[23].y) + (landmarks[30].y-landmarks[24].y) ) / 2  
         if (height_of_hip !== undefined ) {
@@ -27,7 +28,7 @@ export const Transform2Dummy3 = (landmarks, rotateLegs) => {
         }
         return matrix
     }
-    
+
     blazePoses = []
     poseScores = []
     modelBones = []
@@ -37,9 +38,10 @@ export const Transform2Dummy3 = (landmarks, rotateLegs) => {
     }
 
     if (alignMatrix === null) {
-        console.log("calculate matrix to align with Dummy3 ")
+        console.log("calculate matrix to align with robot ")
         alignMatrix = landmarkAlignment(landmarks)
     }
+
 
     for (let i=0; i<landmarks.length; i++ ) {
         let landmark = new BABYLON.Vector3(landmarks[i].x, landmarks[i].y, landmarks[i].z)
@@ -58,7 +60,7 @@ export const Transform2Dummy3 = (landmarks, rotateLegs) => {
     transformLeftLeg(blazePoses, rotateLegs)
 }
 
-export const RotateSpinDummy3 = (bones, mesh) => {
+export const RotateSpinBody = (bones, mesh) => {
     rotateBones(bones, mesh)
     spinBody(bones)
 }
@@ -71,7 +73,7 @@ export const GetLandmarkDirection = (index) => {
     return ret
 }
 
-export const GetDummy3Center = () => {
+export const GetPoseCenter = () => {
     let ret = null
     if (blazePoses.length === NUMBER_OF_LANDMARKS) {
         ret = new BABYLON.Vector3( (blazePoses[23].x + blazePoses[24].x)/2,
@@ -85,11 +87,11 @@ export const GetDummy3Center = () => {
     return ret
 }
 
-export const GetDummy3Bones = () => {
+export const GetModelBones = () => {
     return modelBones
 }
 
-export const GetDummy3Poses = () => {
+export const GetBlazePoses = () => {
     return blazePoses
 }
 
