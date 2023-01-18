@@ -2,9 +2,10 @@ import * as BABYLON from 'babylonjs'
 
 let g_skeleton = null
 let g_sphere = null
-export const  DebugScene = function (scene, mesh, skeleton, showSphere=true, showViewer=true, showAxis=true, showLayer=false) {
+export const  DebugScene = function (scene, mesh, skeleton, showViewer=true, showAxis=true, showLayer=false) {
     g_skeleton = skeleton
     //debug to show landmark location 
+    const showSphere = false
     if (showSphere) {
         g_sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameterX: 0.1, 
                                                                 diameterY: 0.1, 

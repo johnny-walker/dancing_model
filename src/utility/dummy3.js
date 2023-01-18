@@ -121,6 +121,7 @@ const rotateBones = (bones, mesh) => {
             } else {
                 matrix = GetAlignmentMatrix(U, V)
             }
+
             bones[i].setRotationMatrix(matrix) 
         }
     }    
@@ -133,13 +134,14 @@ const spinBody = (bones) => {
     bones[5].setRotationMatrix(matrix) 
 
     // spin shoulders
-    angle = getSpinAngle('shoulder')
-    matrix = GetRotationMatrix(0, angle, 0)
+    angle = getSpinAngle('shoulder')/2
+    let angleLevel = getShoulderZAngle()
+    matrix = GetRotationMatrix(0, angle, angleLevel)
     bones[2].setRotationMatrix(matrix) 
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
-    angle = getSpinAngle('hip')/4
+    angle = getSpinAngle('hip')/3
     matrix = GetRotationMatrix(0, angle, 0)
     bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
@@ -177,6 +179,23 @@ const getSpinAngle = (part) => {
     return angle
 }
 
+const getShoulderZAngle = () => {
+    let direction = new BABYLON.Vector3(blazePoses[12].x-blazePoses[11].x, 
+                                        blazePoses[12].y-blazePoses[11].y, 
+                                        blazePoses[12].z-blazePoses[11].z)   
+
+    // calculate angle
+    let unitX = new BABYLON.Vector3(0, 1, 0) 
+    let projXY = new BABYLON.Vector3(direction.x, direction.y, 0).normalize() 
+    let AdotB = BABYLON.Vector3.Dot(unitX, projXY)
+    let angle = Math.acos(AdotB)
+    
+    // calculate sign, acos range between 0 ~ pie, must judge the sign
+    let AxB =  BABYLON.Vector3.Cross(unitX, projXY)
+    angle = (AxB.z<0) ? -angle : angle
+
+    return angle
+}
 const transformBody = (landmarks) => {
     //0: 'mixamorig:Hips'
     let keypoint1 = new BABYLON.Vector3((landmarks[23].x+landmarks[24].x)/2, 
@@ -193,10 +212,12 @@ const transformBody = (landmarks) => {
     //1: 'mixamorig:Spine'                                   
     //2: 'mixamorig:Spine1'                                    
     //3: 'mixamorig:Spine2'                                   
-    let intepolate = new BABYLON.Vector3((keypoint1.x+keypoint2.x)*3/4, 
-                                         (keypoint1.y+keypoint2.y)*3/4, 
-                                         (keypoint1.z+keypoint2.z)*3/4)  
+    let intepolate = new BABYLON.Vector3((keypoint1.x+keypoint2.x), 
+                                         (keypoint1.y+keypoint2.y), 
+                                         (keypoint1.z+keypoint2.z))  
     modelBones[3] = intepolate
+    modelBones[2] = intepolate
+    modelBones[1] = intepolate
                                        
 }
 
@@ -389,13 +410,7 @@ const transformRightHand = (landmarks) => {
 
 // only rotate RightUpLeg
 const transformRightLeg = (landmarks, rotateLegs=false) => {
-    if (!rotateLegs) {
-        return
-        //57:'mixamorig:RightUpLeg'
-        modelBones[57] = new BABYLON.Vector3( landmarks[24].x,
-                                             -landmarks[24].y,
-                                              0) 
-    } else {
+    if (rotateLegs) {
         let keypoint1 = new BABYLON.Vector3(landmarks[26].x-landmarks[24].x, 
                                             landmarks[26].y-landmarks[24].y, 
                                             0)
@@ -425,13 +440,7 @@ const transformRightLeg = (landmarks, rotateLegs=false) => {
 
 // only rotate LeftUpLeg
 const transformLeftLeg = (landmarks, rotateLegs=false) => {
-    if (!rotateLegs) {
-        return
-        //62:'mixamorig:LeftUpLeg'
-        modelBones[62] = new BABYLON.Vector3( landmarks[23].x,
-                                             -landmarks[23].y,
-                                              0) 
-    } else {
+    if (rotateLegs) {
         let keypoint1 = new BABYLON.Vector3(landmarks[25].x-landmarks[23].x, 
                                             landmarks[25].y-landmarks[23].y, 
                                             0)

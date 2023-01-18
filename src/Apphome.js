@@ -18,7 +18,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }))
 
 function AppHome() {
-  let videoPath = 'home.mp4'
+  let videoPath = 'demo3.mp4'
   return (
     < >
       <Grid container spacing={2}>
