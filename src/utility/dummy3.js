@@ -135,13 +135,13 @@ const spinBody = (bones) => {
 
     // spin shoulders
     angle = getSpinAngle('shoulder')/2
-    let angleLevel = getShoulderZAngle()
-    matrix = GetRotationMatrix(0, angle, angleLevel)
+    matrix = GetRotationMatrix(0, angle, 0)
     bones[2].setRotationMatrix(matrix) 
     bones[3].setRotationMatrix(matrix) 
 
     // spin hip
     angle = getSpinAngle('hip')/3
+
     matrix = GetRotationMatrix(0, angle, 0)
     bones[0].setRotationMatrix(matrix) 
     bones[1].setRotationMatrix(matrix) 
@@ -179,23 +179,6 @@ const getSpinAngle = (part) => {
     return angle
 }
 
-const getShoulderZAngle = () => {
-    let direction = new BABYLON.Vector3(blazePoses[12].x-blazePoses[11].x, 
-                                        blazePoses[12].y-blazePoses[11].y, 
-                                        blazePoses[12].z-blazePoses[11].z)   
-
-    // calculate angle
-    let unitX = new BABYLON.Vector3(0, 1, 0) 
-    let projXY = new BABYLON.Vector3(direction.x, direction.y, 0).normalize() 
-    let AdotB = BABYLON.Vector3.Dot(unitX, projXY)
-    let angle = Math.acos(AdotB)
-    
-    // calculate sign, acos range between 0 ~ pie, must judge the sign
-    let AxB =  BABYLON.Vector3.Cross(unitX, projXY)
-    angle = (AxB.z<0) ? -angle : angle
-
-    return angle
-}
 const transformBody = (landmarks) => {
     //0: 'mixamorig:Hips'
     let keypoint1 = new BABYLON.Vector3((landmarks[23].x+landmarks[24].x)/2, 

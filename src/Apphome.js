@@ -34,8 +34,8 @@ function AppHome() {
         <Grid xs={9}>
           <Item>
             < Babylon3D
-              width={window.innerWidth*3/4 - 12*5}
-              height={window.innerHeight - 64 - 12*3}
+              width={window.innerWidth*3/4 - 12*7}
+              height={window.innerHeight - 64 - 12*5}
             />
           </Item>
         </Grid>

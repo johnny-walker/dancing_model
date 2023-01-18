@@ -1,37 +1,51 @@
 // https://blog.tensorflow.org/2021/08/3d-pose-detection-with-mediapipe-blazepose-ghum-tfjs.html
 import React, { useEffect } from 'react'
 import * as poseDetection from '@tensorflow-models/pose-detection'
+import * as handPoseDetection from '@tensorflow-models/hand-pose-detection'
 import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
+import '@mediapipe/hands'
 
 let detectorInvoked = false
 let resumePlayback = false
 let slowMotion = false
 let warmedUp = false
 let timer = null
-let interval = 150
+let interval = 100
 
 let g_pose = null
 let g_funUpdateKeypoints = null
 
+
 function BlazePose(props) {
-    let detector = null
+    const enableHandDetector = false 
+    let poseDetector = null
+    let handDetector = null
 
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
     let width  = props.width  -  props.width  % 32
     let height = props.height -  props.height % 32
     console.log(`res: ${width}x${height}`)
     var initDetector = async function() {
-        const model = poseDetection.SupportedModels.BlazePose
-        const detectorConfig =  {
-                                    runtime: 'tfjs',        // 'mediapipe' or 'tfjs'
-                                    modelType: 'lite',      // 'lite ', 'full', 'heavy'
-                                    multiPoseMaxDimension: 512
-                                }
+        const modelPose = poseDetection.SupportedModels.BlazePose
+        const poseDetectorConfig =  {
+                                        runtime: 'tfjs',        // 'mediapipe' or 'tfjs'
+                                        modelType: 'lite',      // 'lite ', 'full', 'heavy'
+                                        //multiPoseMaxDimension: 512
+                                    }
         const timestamp = performance.now()
-        detector = await poseDetection.createDetector(model, detectorConfig, timestamp)
+        poseDetector = await poseDetection.createDetector(modelPose, poseDetectorConfig, timestamp)
         console.log('3D POSE detector ready...')
         console.log(performance.now() - timestamp)
+
+        if (enableHandDetector) {
+            const modelHands = handPoseDetection.SupportedModels.MediaPipeHands
+            const handDetectorConfig = {
+                                            runtime: 'tfjs', // 'mediapipe' or 'tfjs'
+                                            modelType: 'lite'
+                                    }
+            handDetector = await handPoseDetection.createDetector(modelHands, handDetectorConfig)
+        }
 
         //window.requestAnimationFrame(estimatePose)    // too early
         timer = window.setInterval(estimatePose, 100)   // delay for 0.1 sec
@@ -49,8 +63,13 @@ function BlazePose(props) {
         video.pause()
 
         const timestamp = performance.now()
-        let poses = await detector.estimatePoses(video)
+        let poses = await poseDetector.estimatePoses(video)
         //console.log(performance.now() - timestamp)
+
+        if (enableHandDetector) {
+            let handPoses = await handDetector.estimateHands(video)
+            console.log(handPoses)
+        }
 
         if (!warmedUp) {
             g_pose = poses[0]
@@ -95,7 +114,8 @@ function BlazePose(props) {
         return () => {
             console.log('BlazePose unmounted')
             video.addEventListener("click", null, true)
-            detector = null
+            poseDetector = null
+            handDetector = null
         }
     }) 
 
