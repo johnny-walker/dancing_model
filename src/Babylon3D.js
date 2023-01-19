@@ -50,7 +50,7 @@ export default function Babylon3D(props) {
             function (meshes, particleSystems, skeletons) {          
                 g_skeleton = skeletons[0]
                 g_mesh = meshes[0]
-                console.log(g_mesh)
+                //console.log(g_mesh)
                 
                 g_scene.createDefaultCameraOrLight(true, true, true)
                 let light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), g_scene)

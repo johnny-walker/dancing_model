@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import { styled } from "@mui/material/styles";
 
@@ -10,12 +10,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
+//import AccountCircle from "@mui/icons-material/AccountCircle";
+//import Switch from "@mui/material/Switch";
+//import FormControlLabel from "@mui/material/FormControlLabel";
+//import FormGroup from "@mui/material/FormGroup";
+//import MenuItem from "@mui/material/MenuItem";
+//import Menu from "@mui/material/Menu";
 import List from "@mui/material/List";
 
 import Divider from "@mui/material/Divider";
@@ -23,12 +23,12 @@ import Divider from "@mui/material/Divider";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import SideBarItems from "./SideBarItems";
 
-const drawerWidth = 240;
+const drawerWidth = 200;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })(
   ({ theme, open }) => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(1),
     transition: theme.transitions.create("margin", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -71,30 +71,16 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
-export default function MenuAppBar() {
-  const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
-
-  const handleChange = (event) => {
-    setAuth(event.target.checked);
-  };
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+export default function MenuAppBar(props) {
+  const [drawerOpen, setDrawerOpen] = React.useState(false)
 
   const handleDrawerOpen = () => {
-    setDrawerOpen(true);
-  };
+    setDrawerOpen(true)
+  }
 
   const handleDrawerClose = () => {
-    setDrawerOpen(false);
-  };
+    setDrawerOpen(false)
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -114,38 +100,7 @@ export default function MenuAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Dancing Model
           </Typography>
-          {false && (
-            <div>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose}>Select Video</MenuItem>
-                <MenuItem onClick={handleClose}>Select WebCam</MenuItem>
-              </Menu>
-            </div>
-          )}
+
         </Toolbar>
       </AppBar>
       <Drawer
@@ -169,27 +124,13 @@ export default function MenuAppBar() {
         </DrawerHeader>
         <Divider />
         <List>
-          <SideBarItems handleDrawerClose={handleDrawerClose} />
+          <SideBarItems handleDrawerClose={handleDrawerClose} setVideoPath={props.setVideoPath}/>
         </List>
       </Drawer>
       <Main open={drawerOpen}>
         <DrawerHeader />
         <Outlet />
       </Main>
-      {false && (
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={auth}
-                onChange={handleChange}
-                aria-label="Detection"
-              />
-            }
-            label={auth ? "Show Video" : "Hide Video"}
-          />
-        </FormGroup>
-      )}
     </Box>
-  );
+  )
 }

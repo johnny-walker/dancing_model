@@ -1,13 +1,11 @@
-import React from "react";
-// import ButtonAppBar from "./Appbar";
+import React from "react"
 import AppHome from "./Apphome"
-const VideoMode = () => {
+const VideoMode = (props) => {
     return (
       <>
-        {/* <ButtonAppBar /> */}
-        <AppHome />
+        <AppHome videoPath={props.videoPath}/>
       </>
-    );
-};
+    )
+}
   
 export default VideoMode

@@ -1,26 +1,26 @@
 // https://blog.tensorflow.org/2021/08/3d-pose-detection-with-mediapipe-blazepose-ghum-tfjs.html
 import React, { useEffect } from 'react'
 import * as poseDetection from '@tensorflow-models/pose-detection'
-import * as handPoseDetection from '@tensorflow-models/hand-pose-detection'
+//import * as handPoseDetection from '@tensorflow-models/hand-pose-detection'
 import '@tensorflow/tfjs-backend-webgl'
 import '@mediapipe/pose'
-import '@mediapipe/hands'
+//import '@mediapipe/hands'
 
+//const enableHandDetector = false 
 let detectorInvoked = false
+let warmedUp = false
 let resumePlayback = false
 let slowMotion = false
-let warmedUp = false
+let mounted = false
 let timer = null
 let interval = 100
 
 let g_pose = null
 let g_funUpdateKeypoints = null
 
-
 function BlazePose(props) {
-    const enableHandDetector = false 
     let poseDetector = null
-    let handDetector = null
+    //let handDetector = null
 
     // Must be a multiple of 32 and defaults to 256. The recommended range is [128, 512]
     let width  = props.width  -  props.width  % 32
@@ -38,6 +38,7 @@ function BlazePose(props) {
         console.log('3D POSE detector ready...')
         console.log(performance.now() - timestamp)
 
+        /*
         if (enableHandDetector) {
             const modelHands = handPoseDetection.SupportedModels.MediaPipeHands
             const handDetectorConfig = {
@@ -46,6 +47,7 @@ function BlazePose(props) {
                                     }
             handDetector = await handPoseDetection.createDetector(modelHands, handDetectorConfig)
         }
+        */
 
         //window.requestAnimationFrame(estimatePose)    // too early
         timer = window.setInterval(estimatePose, 100)   // delay for 0.1 sec
@@ -53,23 +55,26 @@ function BlazePose(props) {
 
 
     var estimatePose = async function() {
-        //if (!warmedUp) 
-        //{
-            //console.log('3D POSE warm up detecting...')
-            clearTimeout(timer)
-        //}
+        clearTimeout(timer)
 
-        const video = document.getElementById('dance_video')
+        if (!mounted) {
+            timer = window.setInterval(estimatePose, interval)
+            return
+        }
+
+        const video = document.getElementById('video')
         video.pause()
 
         const timestamp = performance.now()
         let poses = await poseDetector.estimatePoses(video)
         //console.log(performance.now() - timestamp)
 
-        if (enableHandDetector) {
+        /*
+        if (enableHandDetector && handDetector !== null) {
             let handPoses = await handDetector.estimateHands(video)
             console.log(handPoses)
         }
+        */
 
         if (!warmedUp) {
             g_pose = poses[0]
@@ -101,7 +106,7 @@ function BlazePose(props) {
 
     useEffect(() => {
         console.log('BlazePose mounted')
-        const video = document.getElementById('dance_video')
+        const video = document.getElementById('video')
         video.addEventListener('click', onClick, true) 
         video.addEventListener('dblclick', onDoubleClick, true) 
 
@@ -110,25 +115,25 @@ function BlazePose(props) {
             detectorInvoked = true
             initDetector()
         }
-        
+        mounted = true
+
         return () => {
             console.log('BlazePose unmounted')
             video.addEventListener("click", null, true)
-            poseDetector = null
-            handDetector = null
+            mounted = false
         }
     }) 
 
     return (
         <div>
             <video 
-                id = "dance_video"
+                id = "video"
                 src = {props.src} loop
                 width= {width}
                 height= {height}
                 preload= "auto"
                 muted= "muted"
-            />
+            /> 
         </div>
     )
 }
@@ -138,7 +143,7 @@ export const SetCallback = (updateKeypoints) => {
 }
 
 export const PlayVideo = (state) => {
-    const video = document.getElementById('dance_video')
+    const video = document.getElementById('video')
     if (state === 'play' && resumePlayback) {
         video.play()
         if (slowMotion) {

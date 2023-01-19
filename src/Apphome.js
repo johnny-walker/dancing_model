@@ -19,15 +19,14 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const THEME_SPACING = 12
 
-function AppHome() {
-  let videoPath = 'demo3.mp4'
+function AppHome(props) {
   return (
     < >
       <Grid container spacing={2}>
         <Grid xs={3}>
           <Item>
             < BlazePose
-              src={videoPath}
+              src={props.videoPath}
               width={window.innerWidth/4 - THEME_SPACING*3}
               height={window.innerHeight - 64 - THEME_SPACING*3}
             />
@@ -37,7 +36,7 @@ function AppHome() {
           <Item>
             < Babylon3D
               width={window.innerWidth*3/4 - THEME_SPACING*7}
-              height={window.innerHeight - 64 - THEME_SPACING*5}
+              height={window.innerHeight - 64 - THEME_SPACING*6}
             />
           </Item>
         </Grid>
