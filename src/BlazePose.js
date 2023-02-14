@@ -86,6 +86,7 @@ function BlazePose(props) {
 
     useEffect(() => {
         console.log('BlazePose mounted')
+        console.log(props.src)
         const video = document.getElementById('video')
         video.addEventListener('click', onClick, true) 
         video.addEventListener('dblclick', onDoubleClick, true) 
