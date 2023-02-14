@@ -4,7 +4,7 @@ import 'babylonjs-inspector'
 import {SetCallback, PlayVideo} from './BlazePose.js'
 import {CreateRotationAgent, GetRotationMatrix} from './utility/rotation.js'
 import {DebugScene} from './utility/debugging.js'
-import {DrawLandmarkWizard} from './utility/landmarks.js'
+import {DrawLandmarkWizard, DisposeLandmarkWizard} from './utility/landmarks.js'
 
 import {Transform2Dummy3, RotateSpinDummy3, GetDummy3Poses} from './utility/dummy3.js'
 import {Transform2Robot, RotateSpinRobot, GetRobotPoses} from './utility/robot.js'
@@ -16,7 +16,7 @@ let g_skeleton = null
 let g_mesh = null
 let g_helper = null
 let g_notifyDetection = false
-
+let drawWizard = true
 
 export default function Babylon3D(props) {
     let width = props.width
@@ -60,7 +60,6 @@ export default function Babylon3D(props) {
                 
                 const POSITION_SHIFT = 0.8
                 g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
-                let drawWizard = true
                 let translateY = drawWizard ? POSITION_SHIFT : 0.0
                 g_mesh.position =  new BABYLON.Vector3(-translateY, 0, 0)  // shift the model
  
@@ -76,6 +75,8 @@ export default function Babylon3D(props) {
                         if (drawWizard) {
                             // shift the wizard (opposite to model) 
                             DrawLandmarkWizard(g_scene, poses, translateY)  
+                        } else {
+                            DisposeLandmarkWizard()
                         }
                     }
                 }
@@ -128,7 +129,6 @@ export default function Babylon3D(props) {
 
             const POSITION_SHIFT = 0.8
             g_scene.cameras[0].setPosition(new BABYLON.Vector3(POSITION_SHIFT, 0.5, 4))
-            let drawWizard = true
             let translateY = drawWizard ? POSITION_SHIFT : 0.0
             g_mesh.position =  new BABYLON.Vector3(-translateY, 0, 0)  // shift the model
 
@@ -145,6 +145,8 @@ export default function Babylon3D(props) {
                     if (drawWizard) {
                         // shift the wizard (opposite to model) 
                         DrawLandmarkWizard(g_scene, poses, translateY)  
+                    } else {
+                        DisposeLandmarkWizard()
                     }
                 }
             }
@@ -204,9 +206,19 @@ export default function Babylon3D(props) {
         g_notifyDetection = true
     }
 
+    const onClick = () => {
+        console.log('onClick')
+        drawWizard = !drawWizard
+    }
+
     // constructor, destructor
     useEffect(() => {
         console.log('3D model mounted')
+
+        const canvas3D = document.getElementById('canvas_3d')
+        canvas3D.addEventListener('click', onClick, true) 
+        //canvas3D.addEventListener('dblclick', onDoubleClick, true) 
+
         SetCallback(updateKeypoints)
         // Load the 3D engine
         if (g_engine === null) {

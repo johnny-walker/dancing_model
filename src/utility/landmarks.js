@@ -53,16 +53,20 @@ const createExtrudeShape = function(poses, from, to, index) {
     vectorReps.push(unitVecRep)
 }
 
-export const DrawLandmarkWizard = function (scene, poses, translateY=0) {
-    g_scene = scene
-    g_translateY = translateY
-
+export const DisposeLandmarkWizard = function () {
     vectorReps.forEach(
         vRep => {
             vRep.dispose()
         }
     )
     vectorReps = []
+}
+
+export const DrawLandmarkWizard = function (scene, poses, translateY=0) {
+    g_scene = scene
+    g_translateY = translateY
+
+    DisposeLandmarkWizard()
 
     //head
     createExtrudeShape(poses, 0, 2, 5)
