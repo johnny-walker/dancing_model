@@ -206,8 +206,8 @@ export default function Babylon3D(props) {
         g_notifyDetection = true
     }
 
-    const onClick = () => {
-        console.log('onClick')
+    const onDblClick = () => {
+        console.log('onDblClick')
         drawWizard = !drawWizard
     }
 
@@ -216,7 +216,7 @@ export default function Babylon3D(props) {
         console.log('3D model mounted')
 
         const canvas3D = document.getElementById('canvas_3d')
-        canvas3D.addEventListener('click', onClick, true) 
+        canvas3D.addEventListener('dblclick', onDblClick, true) 
         //canvas3D.addEventListener('dblclick', onDoubleClick, true) 
 
         SetCallback(updateKeypoints)
